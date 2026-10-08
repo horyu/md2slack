@@ -2,13 +2,21 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8">
-    <title>MoonBit WASM接続確認</title>
+    <title>md2slack</title>
   </head>
   <body>
-    <h1>MoonBit WASM接続確認</h1>
-    <p id="result">読み込み中...</p>
+    <h1>md2slack</h1>
+    <label for="markdown">Markdown入力</label><br>
+    <textarea id="markdown" rows="6" cols="60">前 **太字** 後</textarea><br>
+    <p id="status" role="status">読み込み中...</p>
+    <h2>変換結果（HTML文字列）</h2>
+    <pre id="result"></pre>
+    <button id="copy" type="button" disabled>Slack向けにコピー</button>
     <script type="module">
       const result = document.querySelector("#result");
+      const markdown = document.querySelector("#markdown");
+      const status = document.querySelector("#status");
+      const copy = document.querySelector("#copy");
 
       try {
         const response = await fetch("/app.wasm");
@@ -18,9 +26,47 @@
           builtins: ["js-string"],
           importedStringConstants: "_",
         });
-        result.textContent = instance.exports.repeat_twice("hello");
+        function updateResult() {
+          result.textContent = instance.exports.markdown_to_slack_html(markdown.value);
+        }
+        markdown.addEventListener("input", updateResult);
+        updateResult();
+        copy.disabled = false;
+        let copying = false;
+        markdown.addEventListener("copy", (event) => {
+          if (!copying) return;
+          event.preventDefault();
+          const html = result.textContent;
+          const template = document.createElement("template");
+          template.innerHTML = html;
+          event.clipboardData.clearData();
+          event.clipboardData.setData("text/plain", template.content.textContent);
+          event.clipboardData.setData("slack/html", html);
+        });
+        copy.addEventListener("click", () => {
+          const start = markdown.selectionStart;
+          const end = markdown.selectionEnd;
+          const direction = markdown.selectionDirection;
+          const focused = document.activeElement;
+          try {
+            updateResult();
+            copying = true;
+            markdown.focus();
+            markdown.select();
+            status.textContent = document.execCommand("copy")
+              ? "Slack向けにコピーしました。"
+              : "コピーできませんでした。";
+          } catch (error) {
+            status.textContent = `コピー失敗: ${error.message}`;
+          } finally {
+            copying = false;
+            markdown.setSelectionRange(start, end, direction);
+            focused?.focus();
+          }
+        });
+        status.textContent = "入力したMarkdownを変換できます。現在は **太字** に対応しています。";
       } catch (error) {
-        result.textContent = `読み込み失敗: ${error.message}`;
+        status.textContent = `読み込み失敗: ${error.message}`;
         console.error(error);
       }
     </script>
