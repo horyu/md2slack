@@ -4,6 +4,8 @@ import {
 
 pkgtype(kind: "foreign_library")
 
+supported_targets = "wasm-gc"
+
 options(
   link: { "wasm-gc": { "use-js-builtin-string": true } },
 )
