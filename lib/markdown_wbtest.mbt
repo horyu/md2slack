@@ -36,3 +36,36 @@ test "閉じられていない太字の記号は文字として残す" {
     "<b data-stringify-type=\"bold\">完了</b> **未完",
   )
 }
+
+///|
+test "改行コードの違いを同じHTMLの改行に変換する" {
+  assert_eq(
+    markdown_to_slack_html("一行目\n二行目"),
+    "一行目<br>二行目",
+  )
+  assert_eq(
+    markdown_to_slack_html("一行目\r\n二行目"),
+    "一行目<br>二行目",
+  )
+  assert_eq(
+    markdown_to_slack_html("一行目\r二行目"),
+    "一行目<br>二行目",
+  )
+}
+
+///|
+test "空行と先頭・末尾の改行を保持する" {
+  assert_eq(
+    markdown_to_slack_html("\n一行目\n\n二行目\n"),
+    "<br>一行目<br><br>二行目<br>",
+  )
+}
+
+///|
+test "太字の前後と内部の改行を変換する" {
+  assert_eq(
+    markdown_to_slack_html("前\n**太\n字**\n後"),
+    "前<br><b data-stringify-type=\"bold\">太<br>字</b><br>後",
+  )
+  assert_eq(markdown_to_slack_html("<br>\n&"), "&lt;br&gt;<br>&amp;")
+}

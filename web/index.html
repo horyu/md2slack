@@ -43,6 +43,9 @@
           const html = result.textContent;
           const template = document.createElement("template");
           template.innerHTML = html;
+          template.content.querySelectorAll("br").forEach((br) => {
+            br.replaceWith(document.createTextNode("\n"));
+          });
           event.clipboardData.clearData();
           event.clipboardData.setData("text/plain", template.content.textContent);
           event.clipboardData.setData("slack/html", html);
@@ -68,7 +71,7 @@
             focused?.focus();
           }
         });
-        status.textContent = "入力したMarkdownを変換できます。現在は **太字** に対応しています。";
+        status.textContent = "入力したMarkdownを変換できます。現在は **太字** と改行に対応しています。";
       } catch (error) {
         status.textContent = `読み込み失敗: ${error.message}`;
         console.error(error);

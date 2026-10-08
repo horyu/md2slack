@@ -36,4 +36,7 @@ pub fn markdown_to_slack_html(markdown : String) -> String {
     }
   }
   html
+  .replace_all(old="\r\n", new="\n")
+  .replace_all(old="\r", new="\n")
+  .replace_all(old="\n", new="<br>")
 }
