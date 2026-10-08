@@ -71,7 +71,7 @@
             focused?.focus();
           }
         });
-        status.textContent = "入力したMarkdownを変換できます。現在は **太字** と改行に対応しています。";
+        status.textContent = "入力したMarkdownを変換できます。現在は **太字**、インラインコード、改行に対応しています。";
       } catch (error) {
         status.textContent = `読み込み失敗: ${error.message}`;
         console.error(error);

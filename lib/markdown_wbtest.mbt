@@ -69,3 +69,28 @@ test "太字の前後と内部の改行を変換する" {
   )
   assert_eq(markdown_to_slack_html("<br>\n&"), "&lt;br&gt;<br>&amp;")
 }
+
+///|
+test "インラインコードを変換し、前後の太字と通常の文字を保持する" {
+  assert_eq(
+    markdown_to_slack_html("**太字**`code`通常`もう一つ`**後**"),
+    "<b data-stringify-type=\"bold\">太字</b><code data-stringify-type=\"code\">code</code>通常<code data-stringify-type=\"code\">もう一つ</code><b data-stringify-type=\"bold\">後</b>",
+  )
+}
+
+///|
+test "コード内の太字記号は変換せずHTML用にエスケープする" {
+  assert_eq(
+    markdown_to_slack_html("`**太字ではない** <b>&\"'🙂`"),
+    "<code data-stringify-type=\"code\">**太字ではない** &lt;b&gt;&amp;&quot;&#39;🙂</code>",
+  )
+}
+
+///|
+test "閉じられていないバッククォートは文字として残す" {
+  assert_eq(markdown_to_slack_html("前 `未完<&"), "前 `未完&lt;&amp;")
+  assert_eq(
+    markdown_to_slack_html("`完了` `未完"),
+    "<code data-stringify-type=\"code\">完了</code> `未完",
+  )
+}

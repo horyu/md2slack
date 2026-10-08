@@ -10,8 +10,8 @@ fn escape_html(text : StringView) -> String {
 }
 
 ///|
-pub fn markdown_to_slack_html(markdown : String) -> String {
-  let mut remaining = markdown.to_string_view()
+fn render_bold(text : StringView) -> String {
+  let mut remaining = text
   let mut html = ""
   while true {
     match remaining.split_once("**") {
@@ -36,6 +36,40 @@ pub fn markdown_to_slack_html(markdown : String) -> String {
     }
   }
   html
+}
+
+///|
+fn render_inline(text : StringView) -> String {
+  let mut remaining = text
+  let mut html = ""
+  while true {
+    match remaining.split_once("`") {
+      None => {
+        html += render_bold(remaining)
+        break
+      }
+      Some((before, after)) =>
+        match after.split_once("`") {
+          None => {
+            html += render_bold(remaining)
+            break
+          }
+          Some((code, rest)) => {
+            html += render_bold(before)
+            html += "<code data-stringify-type=\"code\">" +
+              escape_html(code) +
+              "</code>"
+            remaining = rest
+          }
+        }
+    }
+  }
+  html
+}
+
+///|
+pub fn markdown_to_slack_html(markdown : String) -> String {
+  render_inline(markdown.to_string_view())
   .replace_all(old="\r\n", new="\n")
   .replace_all(old="\r", new="\n")
   .replace_all(old="\n", new="<br>")
