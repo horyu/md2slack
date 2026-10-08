@@ -1,0 +1,9 @@
+import {
+  "local/md2slack/lib",
+}
+
+pkgtype(kind: "foreign_library")
+
+options(
+  link: { "wasm-gc": { "use-js-builtin-string": true } },
+)

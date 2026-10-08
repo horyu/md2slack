@@ -2,10 +2,27 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8">
-    <title>MoonBitサーバー確認</title>
+    <title>MoonBit WASM接続確認</title>
   </head>
   <body>
-    <h1>MoonBitサーバー確認</h1>
-    <p>このHTMLはMoonBit製のローカルサーバーから配信されています。</p>
+    <h1>MoonBit WASM接続確認</h1>
+    <p id="result">読み込み中...</p>
+    <script type="module">
+      const result = document.querySelector("#result");
+
+      try {
+        const response = await fetch("/app.wasm");
+        if (!response.ok) throw new Error(`WASM取得失敗: ${response.status}`);
+
+        const { instance } = await WebAssembly.instantiateStreaming(response, {}, {
+          builtins: ["js-string"],
+          importedStringConstants: "_",
+        });
+        result.textContent = instance.exports.repeat_twice("hello");
+      } catch (error) {
+        result.textContent = `読み込み失敗: ${error.message}`;
+        console.error(error);
+      }
+    </script>
   </body>
 </html>
