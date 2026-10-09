@@ -94,3 +94,46 @@ test "閉じられていないバッククォートは文字として残す" {
     "<code data-stringify-type=\"code\">完了</code> `未完",
   )
 }
+
+///|
+test "リンクを変換し、前後の書式と複数のリンクを保持する" {
+  assert_eq(
+    markdown_to_slack_html(
+      "**前**[リンク](https://example.com/)[次](http://example.com/)後",
+    ),
+    "<b data-stringify-type=\"bold\">前</b><a href=\"https://example.com/\">リンク</a><a href=\"http://example.com/\">次</a>後",
+  )
+}
+
+///|
+test "リンクの表示名とURLをHTML用にエスケープする" {
+  assert_eq(
+    markdown_to_slack_html("[<名前>&](https://example.com/?a=1&b=\"x\")"),
+    "<a href=\"https://example.com/?a=1&amp;b=&quot;x&quot;\">&lt;名前&gt;&amp;</a>",
+  )
+}
+
+///|
+test "未完成のリンクと未対応のURLは文字として残す" {
+  assert_eq(
+    markdown_to_slack_html("[名前](https://example.com/"),
+    "[名前](https://example.com/",
+  )
+  assert_eq(markdown_to_slack_html("[名前]"), "[名前]")
+  assert_eq(
+    markdown_to_slack_html("[名前](javascript:alert)"),
+    "[名前](javascript:alert)",
+  )
+  assert_eq(
+    markdown_to_slack_html("[名前](/relative)"),
+    "[名前](/relative)",
+  )
+}
+
+///|
+test "インラインコード内のリンク記法は変換しない" {
+  assert_eq(
+    markdown_to_slack_html("`[名前](https://example.com/)`"),
+    "<code data-stringify-type=\"code\">[名前](https://example.com/)</code>",
+  )
+}
