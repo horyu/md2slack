@@ -7,11 +7,14 @@
   <body>
     <h1>md2slack</h1>
     <label for="markdown">Markdown入力</label><br>
-    <textarea id="markdown" rows="6" cols="60">通常のテキストと **太字**
+    <textarea id="markdown" rows="9" cols="60">通常のテキストと **太字**
 インラインコード：`code`（コード内の `**記号**` はそのまま）
 リンク：[example.com](https://example.com/)
 
-空行を挟んだテキスト</textarea><br>
+空行を挟んだテキスト
+
+> **引用** の中の `code`
+> [リンク](https://example.com/)</textarea><br>
     <p id="status" role="status">読み込み中...</p>
     <h2>プレビュー</h2>
     <div id="preview"></div>
@@ -75,7 +78,7 @@
             focused?.focus();
           }
         });
-        status.textContent = "入力したMarkdownを変換できます。現在は **太字**、インラインコード、リンク、改行に対応しています。";
+        status.textContent = "入力したMarkdownを変換できます。現在は **太字**、インラインコード、リンク、引用、改行に対応しています。";
       } catch (error) {
         status.textContent = `読み込み失敗: ${error.message}`;
         console.error(error);

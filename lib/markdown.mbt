@@ -114,9 +114,47 @@ fn render_inline(text : StringView) -> String {
 }
 
 ///|
+fn render_blocks(text : StringView) -> String {
+  let lines = text.split("\n").to_array()
+  let mut index = 0
+  let mut html = ""
+  while index < lines.length() {
+    let is_quote = lines[index].has_prefix(">")
+    let mut content = ""
+    let start = index
+    while index < lines.length() && lines[index].has_prefix(">") == is_quote {
+      if index > start {
+        content += "\n"
+      }
+      let line = if is_quote {
+        let (_, after_marker) = lines[index].split_at(1)
+        match after_marker.strip_prefix(" ") {
+          Some(rest) => rest
+          None => after_marker
+        }
+      } else {
+        lines[index]
+      }
+      content += line.to_owned()
+      index += 1
+    }
+    if start > 0 {
+      html += "\n"
+    }
+    let rendered = render_inline(content.to_string_view())
+    html += if is_quote {
+      "<blockquote data-stringify-type=\"quote\">" + rendered + "</blockquote>"
+    } else {
+      rendered
+    }
+  }
+  html
+}
+
+///|
 pub fn markdown_to_slack_html(markdown : String) -> String {
-  render_inline(markdown.to_string_view())
-  .replace_all(old="\r\n", new="\n")
-  .replace_all(old="\r", new="\n")
-  .replace_all(old="\n", new="<br>")
+  let normalized = markdown
+    .replace_all(old="\r\n", new="\n")
+    .replace_all(old="\r", new="\n")
+  render_blocks(normalized.to_string_view()).replace_all(old="\n", new="<br>")
 }

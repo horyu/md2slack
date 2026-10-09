@@ -137,3 +137,38 @@ test "インラインコード内のリンク記法は変換しない" {
     "<code data-stringify-type=\"code\">[名前](https://example.com/)</code>",
   )
 }
+
+///|
+test "連続する引用行を一つにまとめ、内部の書式を変換する" {
+  assert_eq(
+    markdown_to_slack_html(
+      "> **太字**\n> `code`\n> [リンク](https://example.com/)",
+    ),
+    "<blockquote data-stringify-type=\"quote\"><b data-stringify-type=\"bold\">太字</b><br><code data-stringify-type=\"code\">code</code><br><a href=\"https://example.com/\">リンク</a></blockquote>",
+  )
+}
+
+///|
+test "引用と通常行の切り替え、引用内の空行を保持する" {
+  assert_eq(
+    markdown_to_slack_html("前\n> 引用\n>\n> 続き\n後"),
+    "前<br><blockquote data-stringify-type=\"quote\">引用<br><br>続き</blockquote><br>後",
+  )
+  assert_eq(
+    markdown_to_slack_html("> 一つ目\n\n> 二つ目"),
+    "<blockquote data-stringify-type=\"quote\">一つ目</blockquote><br><br><blockquote data-stringify-type=\"quote\">二つ目</blockquote>",
+  )
+}
+
+///|
+test "引用は行頭で認識し、文字をエスケープして改行コードを統一する" {
+  assert_eq(
+    markdown_to_slack_html("><script>&\r\n> 次"),
+    "<blockquote data-stringify-type=\"quote\">&lt;script&gt;&amp;<br>次</blockquote>",
+  )
+  assert_eq(markdown_to_slack_html("途中 > 記号"), "途中 &gt; 記号")
+  assert_eq(
+    markdown_to_slack_html("`> code`"),
+    "<code data-stringify-type=\"code\">&gt; code</code>",
+  )
+}
