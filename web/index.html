@@ -3,10 +3,40 @@
   <head>
     <meta charset="utf-8">
     <title>md2slack</title>
+    <style>
+      .columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 24px;
+      }
+
+      #markdown {
+        box-sizing: border-box;
+        width: 100%;
+      }
+
+      .column-heading {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      #result {
+        margin: 0;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+    </style>
   </head>
   <body>
     <h1>md2slack</h1>
-    <label for="markdown">Markdown入力</label><br>
+    <p>入力したMarkdownを変換できます。現在は 太字、取り消し線、インラインコード、リンク、引用、箇条書き、改行に対応しています。</p>
+    <div class="columns">
+      <section>
+        <div class="column-heading">
+          <h2><label for="markdown">Markdown入力</label></h2>
+          <button id="paste" type="button" disabled>Markdownをペースト</button>
+        </div>
     <textarea id="markdown" rows="17" cols="60">通常のテキストと **太字**
 取り消し線：~~取り消したテキスト~~
 インラインコード：`code`（コード内の `**記号**` はそのまま）
@@ -22,19 +52,29 @@
     - 孫の項目
   - 次の子の項目
 - `code` の項目
-- [リンク](https://example.com/)</textarea><br>
+- [リンク](https://example.com/)</textarea>
+      </section>
+      <section>
+        <div class="column-heading">
+          <h2>変換結果（HTML文字列）</h2>
+          <button id="copy" type="button" disabled>Slack向けにコピー</button>
+        </div>
+        <pre id="result"></pre>
+      </section>
+    </div>
     <p id="status" role="status">読み込み中...</p>
     <h2>プレビュー</h2>
     <div id="preview"></div>
-    <h2>変換結果（HTML文字列）</h2>
-    <pre id="result"></pre>
-    <button id="copy" type="button" disabled>Slack向けにコピー</button>
     <script type="module">
       const result = document.querySelector("#result");
       const preview = document.querySelector("#preview");
       const markdown = document.querySelector("#markdown");
       const status = document.querySelector("#status");
       const copy = document.querySelector("#copy");
+      const paste = document.querySelector("#paste");
+
+      markdown.focus();
+      markdown.select();
 
       try {
         const response = await fetch("/app.wasm");
@@ -51,6 +91,22 @@
         markdown.addEventListener("input", updateResult);
         updateResult();
         copy.disabled = false;
+        paste.disabled = false;
+        paste.addEventListener("click", async () => {
+          paste.disabled = true;
+          try {
+            const text = await navigator.clipboard.readText();
+            markdown.value = text;
+            updateResult();
+            markdown.focus();
+            markdown.setSelectionRange(text.length, text.length);
+            status.textContent = "";
+          } catch (error) {
+            status.textContent = `ペースト失敗: ${error.message}`;
+          } finally {
+            paste.disabled = false;
+          }
+        });
         let copying = false;
         markdown.addEventListener("copy", (event) => {
           if (!copying) return;
@@ -89,7 +145,7 @@
             markdown.focus();
             markdown.select();
             status.textContent = document.execCommand("copy")
-              ? "Slack向けにコピーしました。"
+              ? ""
               : "コピーできませんでした。";
           } catch (error) {
             status.textContent = `コピー失敗: ${error.message}`;
@@ -99,7 +155,7 @@
             focused?.focus();
           }
         });
-        status.textContent = "入力したMarkdownを変換できます。現在は **太字**、取り消し線、インラインコード、リンク、引用、箇条書き、改行に対応しています。";
+        status.textContent = "";
       } catch (error) {
         status.textContent = `読み込み失敗: ${error.message}`;
         console.error(error);
