@@ -1,4 +1,29 @@
 ///|
+test "取り消し線を変換し、前後の太字と通常の文字を保持する" {
+  let expected =
+    #|前 <s data-stringify-type="strike">一つ目</s> <b data-stringify-type="bold">太字</b> <s data-stringify-type="strike">二つ目</s> 後
+  assert_eq(
+    markdown_to_slack_html("前 ~~一つ目~~ **太字** ~~二つ目~~ 後"),
+    expected,
+  )
+}
+
+///|
+test "取り消し線内の文字をエスケープし、未完の記号を残す" {
+  let expected =
+    #|<s data-stringify-type="strike">&lt;b&gt;&amp;</s> ~~未完&lt;&amp;
+  assert_eq(markdown_to_slack_html("~~<b>&~~ ~~未完<&"), expected)
+  assert_eq(markdown_to_slack_html("~一つ~"), "~一つ~")
+}
+
+///|
+test "コード内の取り消し線記号は変換しない" {
+  let expected =
+    #|<code data-stringify-type="code">~~そのまま~~</code>
+  assert_eq(markdown_to_slack_html("`~~そのまま~~`"), expected)
+}
+
+///|
 test "通常の文字も太字内の文字もHTML用にエスケープする" {
   assert_eq(markdown_to_slack_html(""), "")
   assert_eq(

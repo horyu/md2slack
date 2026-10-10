@@ -10,23 +10,52 @@ fn escape_html(text : StringView) -> String {
 }
 
 ///|
+fn render_strike(text : StringView) -> String {
+  let mut remaining = text
+  let mut html = ""
+  while true {
+    match remaining.split_once("~~") {
+      None => {
+        html += escape_html(remaining)
+        break
+      }
+      Some((before, after)) =>
+        match after.split_once("~~") {
+          None => {
+            html += escape_html(remaining)
+            break
+          }
+          Some((strike, rest)) => {
+            html += escape_html(before)
+            html += "<s data-stringify-type=\"strike\">" +
+              escape_html(strike) +
+              "</s>"
+            remaining = rest
+          }
+        }
+    }
+  }
+  html
+}
+
+///|
 fn render_bold(text : StringView) -> String {
   let mut remaining = text
   let mut html = ""
   while true {
     match remaining.split_once("**") {
       None => {
-        html += escape_html(remaining)
+        html += render_strike(remaining)
         break
       }
       Some((before, after)) =>
         match after.split_once("**") {
           None => {
-            html += escape_html(remaining)
+            html += render_strike(remaining)
             break
           }
           Some((bold, rest)) => {
-            html += escape_html(before)
+            html += render_strike(before)
             html += "<b data-stringify-type=\"bold\">" +
               escape_html(bold) +
               "</b>"
