@@ -229,7 +229,7 @@ test "引用と通常行の切り替え、引用内の空行を保持する" {
       ),
     ),
     (
-      #|前<br><blockquote data-stringify-type="quote">引用<br><br>続き</blockquote><br>後
+      #|前<br><blockquote data-stringify-type="quote">引用<br><br>続き</blockquote>後
     ),
   )
   assert_eq(
@@ -241,7 +241,7 @@ test "引用と通常行の切り替え、引用内の空行を保持する" {
       ),
     ),
     (
-      #|<blockquote data-stringify-type="quote">一つ目</blockquote><br><br><blockquote data-stringify-type="quote">二つ目</blockquote>
+      #|<blockquote data-stringify-type="quote">一つ目</blockquote><br><blockquote data-stringify-type="quote">二つ目</blockquote>
     ),
   )
 }
@@ -285,7 +285,7 @@ test "箇条書きと通常行・空行・引用を切り替える" {
     #|> 引用
     #|後
   let expected =
-    #|前<br><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">一つ目</li><li data-stringify-indent="0" data-stringify-border="0">二つ目</li></ul><br><br><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">別のリスト</li></ul><br><blockquote data-stringify-type="quote">引用</blockquote><br>後
+    #|前<br><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">一つ目</li><li data-stringify-indent="0" data-stringify-border="0">二つ目</li></ul><br><br><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">別のリスト</li></ul><br><blockquote data-stringify-type="quote">引用</blockquote>後
   assert_eq(markdown_to_slack_html(markdown), expected)
 }
 

@@ -60,6 +60,11 @@
           template.content.querySelectorAll("br").forEach((br) => {
             br.replaceWith(document.createTextNode("\n"));
           });
+          template.content.querySelectorAll("blockquote").forEach((quote) => {
+            if (quote.nextSibling) {
+              quote.after(document.createTextNode("\n"));
+            }
+          });
           template.content.querySelectorAll("li").forEach((li) => {
             li.querySelectorAll(":scope > ul").forEach((list) => {
               list.before(document.createTextNode("\n"));

@@ -169,10 +169,12 @@ fn render_blocks(text : StringView) -> String {
   let lines = text.split("\n").to_array()
   let mut index = 0
   let mut html = ""
+  let mut previous_is_quote = false
   while index < lines.length() {
-    if index > 0 {
+    if index > 0 && !previous_is_quote {
       html += "\n"
     }
+    previous_is_quote = false
     if lines[index].has_prefix("- ") {
       let (list, next) = render_list(lines, index, 0)
       html += list
@@ -201,6 +203,7 @@ fn render_blocks(text : StringView) -> String {
       index += 1
     }
     let rendered = render_inline(content.to_string_view())
+    previous_is_quote = is_quote
     html += if is_quote {
       "<blockquote data-stringify-type=\"quote\">" + rendered + "</blockquote>"
     } else {
