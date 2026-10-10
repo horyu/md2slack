@@ -262,3 +262,77 @@ test "引用は行頭で認識し、文字をエスケープして改行コー�
     ),
   )
 }
+
+///|
+test "連続する箇条書きをまとめ、項目内の書式を変換する" {
+  let markdown =
+    #|- **太字**
+    #|- `code`
+    #|- [リンク](https://example.com/)
+  let expected =
+    #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0"><b data-stringify-type="bold">太字</b></li><li data-stringify-indent="0" data-stringify-border="0"><code data-stringify-type="code">code</code></li><li data-stringify-indent="0" data-stringify-border="0"><a href="https://example.com/">リンク</a></li></ul>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "箇条書きと通常行・空行・引用を切り替える" {
+  let markdown =
+    #|前
+    #|- 一つ目
+    #|- 二つ目
+    #|
+    #|- 別のリスト
+    #|> 引用
+    #|後
+  let expected =
+    #|前<br><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">一つ目</li><li data-stringify-indent="0" data-stringify-border="0">二つ目</li></ul><br><br><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">別のリスト</li></ul><br><blockquote data-stringify-type="quote">引用</blockquote><br>後
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "箇条書きの文字をエスケープし、行頭のハイフンと空白で認識する" {
+  let expected =
+    #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">&lt;b&gt;&amp;</li><li data-stringify-indent="0" data-stringify-border="0"></li></ul>
+  assert_eq(markdown_to_slack_html("- <b>&\r\n- "), expected)
+  assert_eq(
+    markdown_to_slack_html("途中 - 記号\n-空白なし"),
+    "途中 - 記号<br>-空白なし",
+  )
+}
+
+///|
+test "箇条書きの子と孫を入れ子にし、兄弟と親に戻る" {
+  let markdown =
+    #|- 親
+    #|  - **子1**
+    #|    - `孫`
+    #|  - [子2](https://example.com/)
+    #|- 次の親
+  let expected =
+    #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">親<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="1" data-border="0"><li data-stringify-indent="1" data-stringify-border="0"><b data-stringify-type="bold">子1</b><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="2" data-border="0"><li data-stringify-indent="2" data-stringify-border="0"><code data-stringify-type="code">孫</code></li></ul></li><li data-stringify-indent="1" data-stringify-border="0"><a href="https://example.com/">子2</a></li></ul></li><li data-stringify-indent="0" data-stringify-border="0">次の親</li></ul>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "入れ子のリストを閉じて通常の行や別のリストへ進む" {
+  let markdown =
+    #|- 親
+    #|  - <子>&
+    #|通常
+    #|
+    #|- 別の親
+  let expected =
+    #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">親<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="1" data-border="0"><li data-stringify-indent="1" data-stringify-border="0">&lt;子&gt;&amp;</li></ul></li></ul><br>通常<br><br><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">別の親</li></ul>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "親のない字下げや階層の飛び越しは通常の文字として残す" {
+  assert_eq(markdown_to_slack_html("  - 親なし"), "  - 親なし")
+  let markdown =
+    #|- 親
+    #|    - 孫へ飛び越し
+  let expected =
+    #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">親</li></ul><br>    - 孫へ飛び越し
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}

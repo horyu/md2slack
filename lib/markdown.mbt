@@ -114,15 +114,78 @@ fn render_inline(text : StringView) -> String {
 }
 
 ///|
+/// 戻り値は Some((階層の深さ, 項目の本文))。箇条書きの行でなければ None。
+/// 深さは先頭のスペース2個につき1増える。本文には先頭のスペースと「- 」を含まない。
+fn list_item(line : StringView) -> (Int, StringView)? {
+  let mut remaining = line
+  let mut depth = 0
+  while remaining.has_prefix("  ") {
+    let (_, rest) = remaining.split_at(2)
+    remaining = rest
+    depth += 1
+  }
+  match remaining.strip_prefix("- ") {
+    Some(item) => Some((depth, item))
+    None => None
+  }
+}
+
+///|
+/// 戻り値は (生成したHTML, 次に処理する行の添字)。
+/// 添字は0から始まり、処理済みの最後の行ではなく、未処理の次の行を指す。
+/// 最後まで処理した場合、添字は lines.length() になる。
+fn render_list(
+  lines : Array[StringView],
+  start : Int,
+  depth : Int,
+) -> (String, Int) {
+  let mut index = start
+  let mut html = "<ul data-stringify-type=\"unordered-list\" data-list-tree=\"true\" data-indent=\"\{depth}\" data-border=\"0\">"
+  while index < lines.length() {
+    match list_item(lines[index]) {
+      Some((item_depth, item)) if item_depth == depth => {
+        html += "<li data-stringify-indent=\"\{depth}\" data-stringify-border=\"0\">" +
+          render_inline(item)
+        index += 1
+        if index < lines.length() {
+          match list_item(lines[index]) {
+            Some((child_depth, _)) if child_depth == depth + 1 => {
+              let (children, next) = render_list(lines, index, child_depth)
+              html += children
+              index = next
+            }
+            _ => ()
+          }
+        }
+        html += "</li>"
+      }
+      _ => break
+    }
+  }
+  (html + "</ul>", index)
+}
+
+///|
 fn render_blocks(text : StringView) -> String {
   let lines = text.split("\n").to_array()
   let mut index = 0
   let mut html = ""
   while index < lines.length() {
+    if index > 0 {
+      html += "\n"
+    }
+    if lines[index].has_prefix("- ") {
+      let (list, next) = render_list(lines, index, 0)
+      html += list
+      index = next
+      continue
+    }
     let is_quote = lines[index].has_prefix(">")
     let mut content = ""
     let start = index
-    while index < lines.length() && lines[index].has_prefix(">") == is_quote {
+    while index < lines.length() &&
+          lines[index].has_prefix(">") == is_quote &&
+          !lines[index].has_prefix("- ") {
       if index > start {
         content += "\n"
       }
@@ -137,9 +200,6 @@ fn render_blocks(text : StringView) -> String {
       }
       content += line.to_owned()
       index += 1
-    }
-    if start > 0 {
-      html += "\n"
     }
     let rendered = render_inline(content.to_string_view())
     html += if is_quote {
