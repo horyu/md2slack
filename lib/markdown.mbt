@@ -120,8 +120,7 @@ fn list_item(line : StringView) -> (Int, StringView)? {
   let mut remaining = line
   let mut depth = 0
   while remaining.has_prefix("  ") {
-    let (_, rest) = remaining.split_at(2)
-    remaining = rest
+    remaining = remaining[2:]
     depth += 1
   }
   match remaining.strip_prefix("- ") {
@@ -190,7 +189,7 @@ fn render_blocks(text : StringView) -> String {
         content += "\n"
       }
       let line = if is_quote {
-        let (_, after_marker) = lines[index].split_at(1)
+        let after_marker = lines[index][1:]
         match after_marker.strip_prefix(" ") {
           Some(rest) => rest
           None => after_marker
