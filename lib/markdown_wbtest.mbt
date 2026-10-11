@@ -1,4 +1,30 @@
 ///|
+test "斜体を変換し、太字と取り消し線を隣に並べられる" {
+  let expected =
+    #|前 <i data-stringify-type="italic">斜体</i> <b data-stringify-type="bold">太字</b> <s data-stringify-type="strike">取り消し</s> <i data-stringify-type="italic">次</i> 後
+  assert_eq(
+    markdown_to_slack_html("前 *斜体* **太字** ~~取り消し~~ *次* 後"),
+    expected,
+  )
+}
+
+///|
+test "斜体内の文字をエスケープし、閉じていない記号を残す" {
+  let expected =
+    #|<i data-stringify-type="italic">&lt;b&gt;&amp;</i> *未完&lt;&amp;
+  assert_eq(markdown_to_slack_html("*<b>&* *未完<&"), expected)
+  assert_eq(markdown_to_slack_html("**未完"), "**未完")
+  assert_eq(markdown_to_slack_html("**"), "**")
+}
+
+///|
+test "コード内の斜体記号は変換しない" {
+  let expected =
+    #|<code data-stringify-type="code">*そのまま*</code>
+  assert_eq(markdown_to_slack_html("`*そのまま*`"), expected)
+}
+
+///|
 test "取り消し線を変換し、前後の太字と通常の文字を保持する" {
   let expected =
     #|前 <s data-stringify-type="strike">一つ目</s> <b data-stringify-type="bold">太字</b> <s data-stringify-type="strike">二つ目</s> 後

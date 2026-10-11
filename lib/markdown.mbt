@@ -10,23 +10,56 @@ fn escape_html(text : StringView) -> String {
 }
 
 ///|
+fn render_italic(text : StringView) -> String {
+  let mut remaining = text
+  let mut html = ""
+  while true {
+    match remaining.split_once("*") {
+      None => {
+        html += escape_html(remaining)
+        break
+      }
+      Some((before, after)) =>
+        match after.split_once("*") {
+          None => {
+            html += escape_html(remaining)
+            break
+          }
+          Some((italic, rest)) => {
+            html += escape_html(before)
+            if italic.is_empty() {
+              html += "**"
+            } else {
+              html += "<i data-stringify-type=\"italic\">" +
+                escape_html(italic) +
+                "</i>"
+            }
+            remaining = rest
+          }
+        }
+    }
+  }
+  html
+}
+
+///|
 fn render_strike(text : StringView) -> String {
   let mut remaining = text
   let mut html = ""
   while true {
     match remaining.split_once("~~") {
       None => {
-        html += escape_html(remaining)
+        html += render_italic(remaining)
         break
       }
       Some((before, after)) =>
         match after.split_once("~~") {
           None => {
-            html += escape_html(remaining)
+            html += render_italic(remaining)
             break
           }
           Some((strike, rest)) => {
-            html += escape_html(before)
+            html += render_italic(before)
             html += "<s data-stringify-type=\"strike\">" +
               escape_html(strike) +
               "</s>"
