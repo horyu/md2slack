@@ -1,4 +1,61 @@
 ///|
+test "コードブロックの改行と字下げを保持し、内部の書式を変換しない" {
+  let markdown =
+    #|```
+    #|  **太字** *斜体* ~~取り消し~~ `code`
+    #|
+    #|- 項目
+    #|> 引用
+    #|```
+  let expected =
+    #|<pre data-stringify-type="pre">  **太字** *斜体* ~~取り消し~~ `code`
+    #|
+    #|- 項目
+    #|&gt; 引用</pre>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "コードブロック内の文字をエスケープし、前後の通常行を変換する" {
+  let markdown =
+    #|**前**
+    #|```
+    #|<script>"&'</script>
+    #|```
+    #|*後*
+  let expected =
+    #|<b data-stringify-type="bold">前</b><pre data-stringify-type="pre">&lt;script&gt;&quot;&amp;&#39;&lt;/script&gt;</pre><i data-stringify-type="italic">後</i>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "コードブロック前の空行だけを保持し、余分な改行タグを追加しない" {
+  let markdown =
+    #|前
+    #|
+    #|```
+    #|code
+    #|```
+  let expected =
+    #|前<br><pre data-stringify-type="pre">code</pre>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "空のコードブロックと閉じていないコードブロックを扱う" {
+  assert_eq(
+    markdown_to_slack_html("```\n```"),
+    (
+      #|<pre data-stringify-type="pre"></pre>
+    ),
+  )
+  let expected =
+    #|<pre data-stringify-type="pre">一行目
+    #|二行目</pre>
+  assert_eq(markdown_to_slack_html("```\r\n一行目\r二行目"), expected)
+}
+
+///|
 test "斜体を変換し、太字と取り消し線を隣に並べられる" {
   let expected =
     #|前 <i data-stringify-type="italic">斜体</i> <b data-stringify-type="bold">太字</b> <s data-stringify-type="strike">取り消し</s> <i data-stringify-type="italic">次</i> 後

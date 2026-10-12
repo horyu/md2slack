@@ -231,12 +231,32 @@ fn render_blocks(text : StringView) -> String {
   let lines = text.split("\n").to_array()
   let mut index = 0
   let mut html = ""
-  let mut previous_is_quote = false
+  let mut previous_is_block = false
   while index < lines.length() {
-    if index > 0 && !previous_is_quote {
-      html += "\n"
+    if index > 0 && !previous_is_block && lines[index] != "```" {
+      html += "<br>"
     }
-    previous_is_quote = false
+    previous_is_block = false
+    if lines[index] == "```" {
+      index += 1
+      let start = index
+      let mut code = ""
+      while index < lines.length() && lines[index] != "```" {
+        if index > start {
+          code += "\n"
+        }
+        code += lines[index].to_owned()
+        index += 1
+      }
+      if index < lines.length() {
+        index += 1
+      }
+      html += "<pre data-stringify-type=\"pre\">" +
+        escape_html(code.to_string_view()) +
+        "</pre>"
+      previous_is_block = true
+      continue
+    }
     if lines[index].has_prefix("- ") {
       let (list, next) = render_list(lines, index, 0)
       html += list
@@ -248,7 +268,8 @@ fn render_blocks(text : StringView) -> String {
     let start = index
     while index < lines.length() &&
           lines[index].has_prefix(">") == is_quote &&
-          !lines[index].has_prefix("- ") {
+          !lines[index].has_prefix("- ") &&
+          lines[index] != "```" {
       if index > start {
         content += "\n"
       }
@@ -264,8 +285,11 @@ fn render_blocks(text : StringView) -> String {
       content += line.to_owned()
       index += 1
     }
-    let rendered = render_inline(content.to_string_view())
-    previous_is_quote = is_quote
+    let rendered = render_inline(content.to_string_view()).replace_all(
+      old="\n",
+      new="<br>",
+    )
+    previous_is_block = is_quote
     html += if is_quote {
       "<blockquote data-stringify-type=\"quote\">" + rendered + "</blockquote>"
     } else {
@@ -280,5 +304,5 @@ pub fn markdown_to_slack_html(markdown : String) -> String {
   let normalized = markdown
     .replace_all(old="\r\n", new="\n")
     .replace_all(old="\r", new="\n")
-  render_blocks(normalized.to_string_view()).replace_all(old="\n", new="<br>")
+  render_blocks(normalized.to_string_view())
 }
