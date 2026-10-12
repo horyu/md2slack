@@ -1,4 +1,31 @@
 ///|
+test "言語指定付きコードブロックは言語名を除いて本文だけを出力する" {
+  let markdown =
+    #|前
+    #|```moonbit
+    #|let text = "<hello>"
+    #|println(text)
+    #|```
+    #|後
+  let expected =
+    #|前<pre data-stringify-type="pre">let text = &quot;&lt;hello&gt;&quot;
+    #|println(text)</pre>後
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "言語指定付きでも閉じる区切りがなければ末尾までコードとして扱う" {
+  let markdown =
+    #|```unknown
+    #|**そのまま**
+    #|```moonbit
+  let expected =
+    #|<pre data-stringify-type="pre">**そのまま**
+    #|```moonbit</pre>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
 test "コードブロックの改行と字下げを保持し、内部の書式を変換しない" {
   let markdown =
     #|```

@@ -227,17 +227,22 @@ fn render_list(
 }
 
 ///|
+fn is_code_block_start(line : StringView) -> Bool {
+  line.has_prefix("```") && !line.has_prefix("````")
+}
+
+///|
 fn render_blocks(text : StringView) -> String {
   let lines = text.split("\n").to_array()
   let mut index = 0
   let mut html = ""
   let mut previous_is_block = false
   while index < lines.length() {
-    if index > 0 && !previous_is_block && lines[index] != "```" {
+    if index > 0 && !previous_is_block && !is_code_block_start(lines[index]) {
       html += "<br>"
     }
     previous_is_block = false
-    if lines[index] == "```" {
+    if is_code_block_start(lines[index]) {
       index += 1
       let start = index
       let mut code = ""
@@ -269,7 +274,7 @@ fn render_blocks(text : StringView) -> String {
     while index < lines.length() &&
           lines[index].has_prefix(">") == is_quote &&
           !lines[index].has_prefix("- ") &&
-          lines[index] != "```" {
+          !is_code_block_start(lines[index]) {
       if index > start {
         content += "\n"
       }
