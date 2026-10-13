@@ -177,7 +177,7 @@ fn render_inline(text : StringView) -> String {
 
 ///|
 /// 戻り値は Some((階層の深さ, 項目の本文))。箇条書きの行でなければ None。
-/// 深さは先頭のスペース2個につき1増える。本文には先頭のスペースと「- 」を含まない。
+/// 深さは先頭のスペース2個につき1増える。本文には字下げと箇条書きの記号・直後のスペースを含まない。
 fn list_item(line : StringView) -> (Int, StringView)? {
   let mut remaining = line
   let mut depth = 0
@@ -185,10 +185,12 @@ fn list_item(line : StringView) -> (Int, StringView)? {
     remaining = remaining[2:]
     depth += 1
   }
-  match remaining.strip_prefix("- ") {
-    Some(item) => Some((depth, item))
-    None => None
+  for marker in ["- ", "* ", "+ "] {
+    if remaining.strip_prefix(marker) is Some(item) {
+      return Some((depth, item))
+    }
   }
+  None
 }
 
 ///|
@@ -284,7 +286,7 @@ fn render_blocks(text : StringView) -> String {
       index += 1
       continue
     }
-    if lines[index].has_prefix("- ") {
+    if list_item(lines[index]) is Some((0, _)) {
       let (list, next) = render_list(lines, index, 0)
       html += list
       index = next
@@ -295,7 +297,7 @@ fn render_blocks(text : StringView) -> String {
     let start = index
     while index < lines.length() &&
           lines[index].has_prefix(">") == is_quote &&
-          !lines[index].has_prefix("- ") &&
+          !(list_item(lines[index]) is Some((0, _))) &&
           !is_code_block_start(lines[index]) &&
           heading_content(lines[index]) is None {
       if index > start {

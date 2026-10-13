@@ -1,4 +1,45 @@
 ///|
+test "三種類の箇条書き記号を同じ形式へ変換する" {
+  let expected =
+    #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">項目</li></ul>
+  for marker in ["- ", "* ", "+ "] {
+    assert_eq(markdown_to_slack_html(marker + "項目"), expected)
+  }
+}
+
+///|
+test "箇条書き記号が混在しても兄弟と入れ子を変換する" {
+  let mixed =
+    #|前
+    #|* 親
+    #|  + 子
+    #|    * 孫
+    #|  - 次の子
+    #|+ 次の親
+    #|後
+  let hyphens =
+    #|前
+    #|- 親
+    #|  - 子
+    #|    - 孫
+    #|  - 次の子
+    #|- 次の親
+    #|後
+  assert_eq(markdown_to_slack_html(mixed), markdown_to_slack_html(hyphens))
+}
+
+///|
+test "箇条書き記号直後にスペースがなければ通常の文字や斜体として扱う" {
+  let markdown =
+    #|+空白なし
+    #|*斜体*
+    #|途中 + 記号
+  let expected =
+    #|+空白なし<br><i data-stringify-type="italic">斜体</i><br>途中 + 記号
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
 test "行頭の見出しを階層にかかわらず太字に変換する" {
   let markdown =
     #|# 一
