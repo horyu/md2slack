@@ -1,4 +1,58 @@
 ///|
+test "行頭の見出しを階層にかかわらず太字に変換する" {
+  let markdown =
+    #|# 一
+    #|## 二
+    #|### 三
+    #|#### 四
+    #|##### 五
+    #|###### 六
+  let expected =
+    #|<b data-stringify-type="bold">一</b><br><b data-stringify-type="bold">二</b><br><b data-stringify-type="bold">三</b><br><b data-stringify-type="bold">四</b><br><b data-stringify-type="bold">五</b><br><b data-stringify-type="bold">六</b>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "見出しを通常行と区切り、本文のコードやリンクを変換する" {
+  let markdown =
+    #|前
+    #|## <見出し>& `code` [リンク](https://example.com/)
+    #|後
+  let expected =
+    #|前<br><b data-stringify-type="bold">&lt;見出し&gt;&amp; <code data-stringify-type="code">code</code> <a href="https://example.com/">リンク</a></b><br>後
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "見出しの記号は行頭とスペースと六段階までを条件に認識する" {
+  let markdown =
+    #|途中 # 記号
+    #|#空白なし
+    #|####### 七
+    #| # 字下げ
+  let expected =
+    #|途中 # 記号<br>#空白なし<br>####### 七<br> # 字下げ
+  assert_eq(markdown_to_slack_html(markdown), expected)
+  assert_eq(
+    markdown_to_slack_html("# "),
+    (
+      #|<b data-stringify-type="bold"></b>
+    ),
+  )
+}
+
+///|
+test "コードブロック内の見出し記号は変換しない" {
+  let markdown =
+    #|```
+    #|# そのまま
+    #|```
+  let expected =
+    #|<pre data-stringify-type="pre"># そのまま</pre>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
 test "言語指定付きコードブロックは言語名を除いて本文だけを出力する" {
   let markdown =
     #|前

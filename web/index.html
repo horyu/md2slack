@@ -30,14 +30,15 @@
   </head>
   <body>
     <h1>md2slack</h1>
-    <p>入力したMarkdownを変換できます。現在は 太字、斜体、取り消し線、インラインコード、コードブロック、リンク、引用、箇条書き、改行に対応しています。</p>
+    <p>入力したMarkdownを変換できます。現在は 見出し、太字、斜体、取り消し線、インラインコード、コードブロック、リンク、引用、箇条書き、改行に対応しています。</p>
     <div class="columns">
       <section>
         <div class="column-heading">
           <h2><label for="markdown">Markdown入力</label></h2>
           <button id="paste" type="button" disabled>Markdownをペースト</button>
         </div>
-    <textarea id="markdown" rows="18" cols="60">通常のテキストと **太字**
+    <textarea id="markdown" rows="18" cols="60">## 見出しは太字へ変換します
+通常のテキストと **太字**
 斜体：*斜めのテキスト*
 取り消し線：~~取り消したテキスト~~
 インラインコード：`code`（コード内の `**記号**` はそのまま）

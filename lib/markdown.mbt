@@ -227,6 +227,21 @@ fn render_list(
 }
 
 ///|
+/// 戻り値は見出しの記号と直後のスペースを除いた本文。見出しの行でなければ None。
+fn heading_content(line : StringView) -> StringView? {
+  let mut remaining = line
+  let mut level = 0
+  while remaining.has_prefix("#") && level < 6 {
+    remaining = remaining[1:]
+    level += 1
+  }
+  if level == 0 {
+    return None
+  }
+  remaining.strip_prefix(" ")
+}
+
+///|
 fn is_code_block_start(line : StringView) -> Bool {
   line.has_prefix("```") && !line.has_prefix("````")
 }
@@ -262,6 +277,13 @@ fn render_blocks(text : StringView) -> String {
       previous_is_block = true
       continue
     }
+    if heading_content(lines[index]) is Some(heading) {
+      html += "<b data-stringify-type=\"bold\">" +
+        render_inline(heading) +
+        "</b>"
+      index += 1
+      continue
+    }
     if lines[index].has_prefix("- ") {
       let (list, next) = render_list(lines, index, 0)
       html += list
@@ -274,7 +296,8 @@ fn render_blocks(text : StringView) -> String {
     while index < lines.length() &&
           lines[index].has_prefix(">") == is_quote &&
           !lines[index].has_prefix("- ") &&
-          !is_code_block_start(lines[index]) {
+          !is_code_block_start(lines[index]) &&
+          heading_content(lines[index]) is None {
       if index > start {
         content += "\n"
       }
