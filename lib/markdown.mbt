@@ -229,9 +229,16 @@ fn render_list(
 }
 
 ///|
-/// 戻り値は Some((番号の文字列, 項目の本文))。番号付きリストの行でなければ None。
-fn ordered_item(line : StringView) -> (StringView, StringView)? {
-  let (number, item) = match line.split_once(". ") {
+/// 戻り値は Some((階層の深さ, 番号の文字列, 項目の本文))。番号付きリストの行でなければ None。
+/// 深さは先頭のスペース2個につき1増える。本文には字下げ・番号・「. 」を含まない。
+fn ordered_item(line : StringView) -> (Int, StringView, StringView)? {
+  let mut remaining = line
+  let mut depth = 0
+  while remaining.has_prefix("  ") {
+    remaining = remaining[2:]
+    depth += 1
+  }
+  let (number, item) = match remaining.split_once(". ") {
     Some(parts) => parts
     None => return None
   }
@@ -239,11 +246,11 @@ fn ordered_item(line : StringView) -> (StringView, StringView)? {
     return None
   }
   for digit in number {
-    if !(digit is '0'..='9') {
+    if !(digit is ('0'..='9')) {
       return None
     }
   }
-  Some((number, item))
+  Some((depth, number, item))
 }
 
 ///|
@@ -252,21 +259,34 @@ fn ordered_item(line : StringView) -> (StringView, StringView)? {
 fn render_ordered_list(
   lines : Array[StringView],
   start : Int,
+  depth : Int,
   start_number : StringView,
 ) -> (String, Int) {
   let mut index = start
-  let mut html = "<ol data-stringify-type=\"ordered-list\" data-list-tree=\"true\" data-indent=\"0\" data-border=\"0\" start=\"" +
+  let mut html = "<ol data-stringify-type=\"ordered-list\" data-list-tree=\"true\" data-indent=\"\{depth}\" data-border=\"0\" start=\"" +
     start_number.to_owned() +
     "\">"
   while index < lines.length() {
     match ordered_item(lines[index]) {
-      Some((_, item)) => {
-        html += "<li data-stringify-indent=\"0\" data-stringify-border=\"0\">" +
-          render_inline(item) +
-          "</li>"
+      Some((item_depth, _, item)) if item_depth == depth => {
+        html += "<li data-stringify-indent=\"\{depth}\" data-stringify-border=\"0\">" +
+          render_inline(item)
         index += 1
+        if index < lines.length() {
+          match ordered_item(lines[index]) {
+            Some((child_depth, number, _)) if child_depth == depth + 1 => {
+              let (children, next) = render_ordered_list(
+                lines, index, child_depth, number,
+              )
+              html += children
+              index = next
+            }
+            _ => ()
+          }
+        }
+        html += "</li>"
       }
-      None => break
+      _ => break
     }
   }
   (html + "</ol>", index)
@@ -302,7 +322,7 @@ fn render_blocks(text : StringView) -> String {
     if index > 0 &&
       !previous_is_block &&
       !is_code_block_start(lines[index]) &&
-      ordered_item(lines[index]) is None {
+      !(ordered_item(lines[index]) is Some((0, _, _))) {
       html += "<br>"
     }
     previous_is_block = false
@@ -333,8 +353,8 @@ fn render_blocks(text : StringView) -> String {
       index += 1
       continue
     }
-    if ordered_item(lines[index]) is Some((number, _)) {
-      let (list, next) = render_ordered_list(lines, index, number)
+    if ordered_item(lines[index]) is Some((0, number, _)) {
+      let (list, next) = render_ordered_list(lines, index, 0, number)
       html += list
       index = next
       continue
@@ -351,7 +371,7 @@ fn render_blocks(text : StringView) -> String {
     while index < lines.length() &&
           lines[index].has_prefix(">") == is_quote &&
           !(list_item(lines[index]) is Some((0, _))) &&
-          ordered_item(lines[index]) is None &&
+          !(ordered_item(lines[index]) is Some((0, _, _))) &&
           !is_code_block_start(lines[index]) &&
           heading_content(lines[index]) is None {
       if index > start {

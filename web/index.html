@@ -57,6 +57,9 @@
 - [リンク](https://example.com/)
 
 1. **最初**の手順
+  3. 子の手順（3から開始）
+    1. 孫の手順
+  4. 次の子の手順
 2. `次`の手順
 
 ```moonbit
@@ -129,7 +132,7 @@ println(text)
             br.replaceWith(document.createTextNode("\n"));
           });
           template.content.querySelectorAll("pre, ol").forEach((block) => {
-            if (block.previousSibling) {
+            if (block.parentNode === template.content && block.previousSibling) {
               block.before(document.createTextNode("\n"));
             }
           });
@@ -139,7 +142,7 @@ println(text)
             }
           });
           template.content.querySelectorAll("li").forEach((li) => {
-            li.querySelectorAll(":scope > ul").forEach((list) => {
+            li.querySelectorAll(":scope > ul, :scope > ol").forEach((list) => {
               list.before(document.createTextNode("\n"));
             });
             if (li.nextElementSibling) {

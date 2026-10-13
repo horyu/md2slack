@@ -1,4 +1,40 @@
 ///|
+test "番号付きリストの子と孫を入れ子にし、開始番号を階層ごとに保持する" {
+  let markdown =
+    #|2. 親
+    #|  3. **子**
+    #|    5. `孫`
+    #|  4. 次の子
+    #|3. 次の親
+  let expected =
+    #|<ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="0" data-border="0" start="2"><li data-stringify-indent="0" data-stringify-border="0">親<ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="1" data-border="0" start="3"><li data-stringify-indent="1" data-stringify-border="0"><b data-stringify-type="bold">子</b><ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="2" data-border="0" start="5"><li data-stringify-indent="2" data-stringify-border="0"><code data-stringify-type="code">孫</code></li></ol></li><li data-stringify-indent="1" data-stringify-border="0">次の子</li></ol></li><li data-stringify-indent="0" data-stringify-border="0">次の親</li></ol>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "入れ子の番号付きリストを閉じ、通常行と別のリストへ進む" {
+  let markdown =
+    #|1. 親
+    #|  1. <子>&
+    #|通常
+    #|
+    #|4. 別の親
+  let first = markdown_to_slack_html("1. 親\n  1. <子>&")
+  let last = markdown_to_slack_html("4. 別の親")
+  assert_eq(markdown_to_slack_html(markdown), first + "<br>通常<br>" + last)
+}
+
+///|
+test "番号付きリストの階層を飛び越す行は通常の文字として残す" {
+  let markdown =
+    #|1. 親
+    #|    1. 孫へ飛び越し
+  let expected = markdown_to_slack_html("1. 親") +
+    "<br>    1. 孫へ飛び越し"
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
 test "番号付きリストをまとめ、項目内の書式を変換する" {
   let markdown =
     #|前
