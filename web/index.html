@@ -30,7 +30,7 @@
   </head>
   <body>
     <h1>md2slack</h1>
-    <p>入力したMarkdownを変換できます。現在は 見出し、太字、斜体、取り消し線、インラインコード、コードブロック、リンク、引用、箇条書き、改行に対応しています。</p>
+    <p>入力したMarkdownを変換できます。現在は 見出し、太字、斜体、取り消し線、インラインコード、コードブロック、リンク、引用、箇条書き、番号付きリスト、改行に対応しています。</p>
     <div class="columns">
       <section>
         <div class="column-heading">
@@ -55,6 +55,9 @@
   - 次の子の項目
 - `code` の項目
 - [リンク](https://example.com/)
+
+1. **最初**の手順
+2. `次`の手順
 
 ```moonbit
 // 言語名は指定できますが、Slack向けの変換では無視され、色分けされません。
@@ -125,9 +128,9 @@ println(text)
           template.content.querySelectorAll("br").forEach((br) => {
             br.replaceWith(document.createTextNode("\n"));
           });
-          template.content.querySelectorAll("pre").forEach((code) => {
-            if (code.previousSibling) {
-              code.before(document.createTextNode("\n"));
+          template.content.querySelectorAll("pre, ol").forEach((block) => {
+            if (block.previousSibling) {
+              block.before(document.createTextNode("\n"));
             }
           });
           template.content.querySelectorAll("blockquote, pre").forEach((quote) => {

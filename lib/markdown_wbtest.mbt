@@ -1,4 +1,63 @@
 ///|
+test "番号付きリストをまとめ、項目内の書式を変換する" {
+  let markdown =
+    #|前
+    #|1. **太字**
+    #|2. `code`
+    #|3. [リンク](https://example.com/)
+    #|後
+  let expected =
+    #|前<ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="0" data-border="0" start="1"><li data-stringify-indent="0" data-stringify-border="0"><b data-stringify-type="bold">太字</b></li><li data-stringify-indent="0" data-stringify-border="0"><code data-stringify-type="code">code</code></li><li data-stringify-indent="0" data-stringify-border="0"><a href="https://example.com/">リンク</a></li></ol><br>後
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "番号付きリスト前の空行だけを保持し、余分な改行タグを追加しない" {
+  let markdown =
+    #|前
+    #|
+    #|1. 項目
+  let expected =
+    #|前<br><ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="0" data-border="0" start="1"><li data-stringify-indent="0" data-stringify-border="0">項目</li></ol>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "番号付きリストは最初の番号から順に数え、文字をエスケープする" {
+  let markdown =
+    #|3. <一つ目>&
+    #|1. 二つ目
+  let expected =
+    #|<ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="0" data-border="0" start="3"><li data-stringify-indent="0" data-stringify-border="0">&lt;一つ目&gt;&amp;</li><li data-stringify-indent="0" data-stringify-border="0">二つ目</li></ol>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "番号付きリストは行頭の九桁までの半角数字とピリオドとスペースで認識する" {
+  let markdown =
+    #|1.空白なし
+    #|a. 文字
+    #|１. 全角
+    #|1234567890. 桁数超過
+    #|  1. 字下げ
+    #|途中 1. 記号
+  let expected =
+    #|1.空白なし<br>a. 文字<br>１. 全角<br>1234567890. 桁数超過<br>  1. 字下げ<br>途中 1. 記号
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "コードブロック内の番号付きリストは変換しない" {
+  let markdown =
+    #|```
+    #|1. そのまま
+    #|```
+  let expected =
+    #|<pre data-stringify-type="pre">1. そのまま</pre>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
 test "三種類の箇条書き記号を同じ形式へ変換する" {
   let expected =
     #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">項目</li></ul>
