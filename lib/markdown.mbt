@@ -313,6 +313,51 @@ fn is_code_block_start(line : StringView) -> Bool {
 }
 
 ///|
+fn quote_content(line : StringView) -> StringView {
+  let after_marker = line[1:]
+  match after_marker.strip_prefix(" ") {
+    Some(rest) => rest
+    None => after_marker
+  }
+}
+
+///|
+fn render_quote(text : StringView, depth : Int) -> String {
+  let lines = text.split("\n").to_array()
+  let mut index = 0
+  let mut html = ""
+  let mut previous_is_nested = false
+  while index < lines.length() {
+    let is_nested = depth < 2 && lines[index].has_prefix(">")
+    if index > 0 && !previous_is_nested && !is_nested {
+      html += "<br>"
+    }
+    let start = index
+    let mut content = ""
+    while index < lines.length() &&
+          (depth < 2 && lines[index].has_prefix(">")) == is_nested {
+      if index > start {
+        content += "\n"
+      }
+      let line = if is_nested {
+        quote_content(lines[index])
+      } else {
+        lines[index]
+      }
+      content += line.to_owned()
+      index += 1
+    }
+    html += if is_nested {
+      render_quote(content.to_string_view(), depth + 1)
+    } else {
+      render_inline(content.to_string_view()).replace_all(old="\n", new="<br>")
+    }
+    previous_is_nested = is_nested
+  }
+  "<blockquote data-stringify-type=\"quote\">" + html + "</blockquote>"
+}
+
+///|
 fn render_blocks(text : StringView) -> String {
   let lines = text.split("\n").to_array()
   let mut index = 0
@@ -378,26 +423,18 @@ fn render_blocks(text : StringView) -> String {
         content += "\n"
       }
       let line = if is_quote {
-        let after_marker = lines[index][1:]
-        match after_marker.strip_prefix(" ") {
-          Some(rest) => rest
-          None => after_marker
-        }
+        quote_content(lines[index])
       } else {
         lines[index]
       }
       content += line.to_owned()
       index += 1
     }
-    let rendered = render_inline(content.to_string_view()).replace_all(
-      old="\n",
-      new="<br>",
-    )
     previous_is_block = is_quote
     html += if is_quote {
-      "<blockquote data-stringify-type=\"quote\">" + rendered + "</blockquote>"
+      render_quote(content.to_string_view(), 1)
     } else {
-      rendered
+      render_inline(content.to_string_view()).replace_all(old="\n", new="<br>")
     }
   }
   html

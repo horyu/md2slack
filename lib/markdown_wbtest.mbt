@@ -1,4 +1,39 @@
 ///|
+test "スペースありとなしの二階層の引用を同じ子の引用にまとめる" {
+  let markdown =
+    #|> 親
+    #|> > **子1**
+    #|>> `子2`
+    #|> 親に戻る
+  let expected =
+    #|<blockquote data-stringify-type="quote">親<blockquote data-stringify-type="quote"><b data-stringify-type="bold">子1</b><br><code data-stringify-type="code">子2</code></blockquote>親に戻る</blockquote>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "子の引用だけでも二階層にし、内部の空行とエスケープを保持する" {
+  let markdown =
+    #|>> <子>&
+    #|> >
+    #|>> 続き
+    #|通常行
+  let expected =
+    #|<blockquote data-stringify-type="quote"><blockquote data-stringify-type="quote">&lt;子&gt;&amp;<br><br>続き</blockquote></blockquote>通常行
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "引用は二階層までとし、三つ目以降の記号は本文に残す" {
+  let markdown =
+    #|>>> 三つ目
+    #|> > > スペースあり
+    #|>>>> 四つ目
+  let expected =
+    #|<blockquote data-stringify-type="quote"><blockquote data-stringify-type="quote">&gt; 三つ目<br>&gt; スペースあり<br>&gt;&gt; 四つ目</blockquote></blockquote>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
 test "番号付きリストの子と孫を入れ子にし、開始番号を階層ごとに保持する" {
   let markdown =
     #|2. 親

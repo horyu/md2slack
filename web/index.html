@@ -48,6 +48,9 @@
 
 > **引用** の中の `code`
 > [リンク](https://example.com/)
+> > 2階層の引用（スペースあり）
+>> 2階層の引用（スペースなし）
+> 元の階層に戻る
 
 - **太字** の項目
   * 子の項目（* でも箇条書き）
@@ -134,6 +137,11 @@ println(text)
           template.content.querySelectorAll("pre, ol").forEach((block) => {
             if (block.parentNode === template.content && block.previousSibling) {
               block.before(document.createTextNode("\n"));
+            }
+          });
+          template.content.querySelectorAll("blockquote blockquote").forEach((quote) => {
+            if (quote.previousSibling) {
+              quote.before(document.createTextNode("\n"));
             }
           });
           template.content.querySelectorAll("blockquote, pre").forEach((quote) => {
