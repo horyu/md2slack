@@ -1,0 +1,13 @@
+{
+  "name": "md2slack",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MarkdownをSlackへ貼り付けやすいHTMLに変換するWebサイト",
+  "scripts": {
+    "build": "moon build --target wasm-gc web/wasm",
+    "dev": "moon run web/server",
+    "check": "moon check --deny-warn",
+    "test": "moon test"
+  },
+  "license": "WTFPL"
+}
