@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>md2slack</title>
+    <style>
+      .columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 24px;
+      }
+
+      #markdown {
+        box-sizing: border-box;
+        width: 100%;
+      }
+
+      .column-heading {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      #result {
+        margin: 0;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>md2slack</h1>
+    <p>入力したMarkdownを変換できます。現在は 見出し、太字、斜体、取り消し線、インラインコード、コードブロック、リンク、引用、箇条書き、番号付きリスト、改行に対応しています。</p>
+    <div class="columns">
+      <section>
+        <div class="column-heading">
+          <h2><label for="markdown">Markdown入力</label></h2>
+          <button id="paste" type="button" disabled>Markdownをペースト</button>
+        </div>
+    <textarea id="markdown" rows="18" cols="60">## 見出しは太字へ変換します
+通常のテキストと **太字**
+斜体：*斜めのテキスト*
+取り消し線：~~取り消したテキスト~~
+インラインコード：`code`（コード内の `**記号**` はそのまま）
+リンク：[example.com](https://example.com/)
+
+空行を挟んだテキスト
+
+> **引用** の中の `code`
+> [リンク](https://example.com/)
+> > 2階層の引用（スペースあり）
+>> 2階層の引用（スペースなし）
+> 元の階層に戻る
+
+- **太字** の項目
+  * 子の項目（* でも箇条書き）
+    + 孫の項目（+ でも箇条書き）
+  - 次の子の項目
+- `code` の項目
+- [リンク](https://example.com/)
+
+1. **最初**の手順
+  3. 子の手順（3から開始）
+    1. 孫の手順
+  4. 次の子の手順
+2. `次`の手順
+
+```moonbit
+// 言語名は指定できますが、Slack向けの変換では無視され、色分けされません。
+let text = "hello"
+println(text)
+```</textarea>
+      </section>
+      <section>
+        <div class="column-heading">
+          <h2>変換結果（HTML文字列）</h2>
+          <button id="copy" type="button" disabled>Slack向けにコピー</button>
+        </div>
+        <pre id="result"></pre>
+      </section>
+    </div>
+    <p id="status" role="status">読み込み中...</p>
+    <h2>プレビュー</h2>
+    <div id="preview"></div>
+    <script type="module">
+      const result = document.querySelector("#result");
+      const preview = document.querySelector("#preview");
+      const markdown = document.querySelector("#markdown");
+      const status = document.querySelector("#status");
+      const copy = document.querySelector("#copy");
+      const paste = document.querySelector("#paste");
+
+      markdown.focus();
+      markdown.select();
+
+      try {
+        const response = await fetch("./app.wasm");
+        if (!response.ok) throw new Error(`WASM取得失敗: ${response.status}`);
+
+        const { instance } = await WebAssembly.instantiateStreaming(response, {}, {
+          builtins: ["js-string"],
+          importedStringConstants: "_",
+        });
+        function updateResult() {
+          result.textContent = instance.exports.markdown_to_slack_html(markdown.value);
+          preview.innerHTML = result.textContent;
+        }
+        markdown.addEventListener("input", updateResult);
+        updateResult();
+        copy.disabled = false;
+        paste.disabled = false;
+        paste.addEventListener("click", async () => {
+          paste.disabled = true;
+          try {
+            const text = await navigator.clipboard.readText();
+            markdown.value = text;
+            updateResult();
+            markdown.focus();
+            markdown.setSelectionRange(text.length, text.length);
+            status.textContent = "";
+          } catch (error) {
+            status.textContent = `ペースト失敗: ${error.message}`;
+          } finally {
+            paste.disabled = false;
+          }
+        });
+        let copying = false;
+        markdown.addEventListener("copy", (event) => {
+          if (!copying) return;
+          event.preventDefault();
+          const html = result.textContent;
+          const template = document.createElement("template");
+          template.innerHTML = html;
+          template.content.querySelectorAll("br").forEach((br) => {
+            br.replaceWith(document.createTextNode("\n"));
+          });
+          template.content.querySelectorAll("pre, ol").forEach((block) => {
+            if (block.parentNode === template.content && block.previousSibling) {
+              block.before(document.createTextNode("\n"));
+            }
+          });
+          template.content.querySelectorAll("blockquote blockquote").forEach((quote) => {
+            if (quote.previousSibling) {
+              quote.before(document.createTextNode("\n"));
+            }
+          });
+          template.content.querySelectorAll("blockquote, pre").forEach((quote) => {
+            if (quote.nextSibling) {
+              quote.after(document.createTextNode("\n"));
+            }
+          });
+          template.content.querySelectorAll("li").forEach((li) => {
+            li.querySelectorAll(":scope > ul, :scope > ol").forEach((list) => {
+              list.before(document.createTextNode("\n"));
+            });
+            if (li.nextElementSibling) {
+              li.append(document.createTextNode("\n"));
+            }
+          });
+          event.clipboardData.clearData();
+          event.clipboardData.setData("text/plain", template.content.textContent);
+          event.clipboardData.setData("slack/html", html);
+        });
+        copy.addEventListener("click", () => {
+          const start = markdown.selectionStart;
+          const end = markdown.selectionEnd;
+          const direction = markdown.selectionDirection;
+          const focused = document.activeElement;
+          try {
+            updateResult();
+            copying = true;
+            markdown.focus();
+            markdown.select();
+            status.textContent = document.execCommand("copy")
+              ? ""
+              : "コピーできませんでした。";
+          } catch (error) {
+            status.textContent = `コピー失敗: ${error.message}`;
+          } finally {
+            copying = false;
+            markdown.setSelectionRange(start, end, direction);
+            focused?.focus();
+          }
+        });
+        status.textContent = "";
+      } catch (error) {
+        status.textContent = `読み込み失敗: ${error.message}`;
+        console.error(error);
+      }
+    </script>
+  </body>
+</html>

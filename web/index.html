@@ -94,7 +94,7 @@ println(text)
       markdown.select();
 
       try {
-        const response = await fetch("/app.wasm");
+        const response = await fetch("./app.wasm");
         if (!response.ok) throw new Error(`WASM取得失敗: ${response.status}`);
 
         const { instance } = await WebAssembly.instantiateStreaming(response, {}, {
