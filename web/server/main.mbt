@@ -27,11 +27,9 @@ async fn main {
   server.run_forever((request, _body, conn) => {
     match (request.meth, request.path) {
       (Get, "/") =>
-        serve_file(conn, "web/index.html", "text/html; charset=utf-8")
+        serve_file(conn, "docs/index.html", "text/html; charset=utf-8")
       (Get, "/app.wasm") =>
-        serve_file(
-          conn, "_build/wasm-gc/debug/build/web/wasm/wasm.wasm", "application/wasm",
-        )
+        serve_file(conn, "docs/app.wasm", "application/wasm")
       _ =>
         conn..send_response(404, "NotFound")..write("Not found").end_response()
     }

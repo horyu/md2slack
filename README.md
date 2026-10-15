@@ -30,7 +30,7 @@ aube run test
 
 ## ブラウザで確認
 
-`aube run build`でWebAssemblyをビルドし、公開用の`docs`フォルダに`index.html`と`app.wasm`を配置します。GitHub Pagesでも公開できるよう、`docs`はGitで管理します。
+HTMLは`docs/index.html`を直接編集します。`aube run build`でWebAssemblyをビルドし、`docs/app.wasm`へ配置します。GitHub Pagesでも公開できるよう、`docs`はGitで管理します。開発サーバーもこの2ファイルを配信します。
 
 WebAssemblyのJavaScript文字列連携に対応したブラウザが必要です。リポジトリのルートで次を実行します。
 
