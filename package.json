@@ -9,5 +9,8 @@
     "check": "moon check --deny-warn",
     "test": "moon test"
   },
-  "license": "WTFPL"
+  "license": "WTFPL",
+  "devDependencies": {
+    "wrangler": "4.151.0"
+  }
 }
