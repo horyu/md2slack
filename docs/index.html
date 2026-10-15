@@ -4,6 +4,12 @@
     <meta charset="utf-8">
     <title>md2slack</title>
     <style>
+      .page-heading {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
       .columns {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -29,7 +35,10 @@
     </style>
   </head>
   <body>
-    <h1>md2slack</h1>
+    <div class="page-heading">
+      <h1>md2slack</h1>
+      <a href="https://github.com/horyu/md2slack">GitHub</a>
+    </div>
     <p>入力したMarkdownを変換できます。現在は 見出し、太字、斜体、取り消し線、インラインコード、コードブロック、リンク、引用、箇条書き、番号付きリスト、改行に対応しています。</p>
     <div class="columns">
       <section>
