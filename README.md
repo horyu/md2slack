@@ -13,12 +13,6 @@ mise install
 
 Node.jsとaubeのバージョンは`mise.toml`で指定しています。aubeはパッケージの管理と、`package.json`に定義したコマンドの実行に使用します。
 
-## コマンドラインインターフェース（CLI）で実行
-
-```powershell
-moon run cmd/main
-```
-
 ## チェックとテスト
 
 ```powershell
@@ -64,3 +58,11 @@ aube run deploy
 ```
 
 `deploy`は`wrangler.jsonc`で指定した`docs`フォルダを公開します。
+
+## コマンドラインインターフェース（CLI）で実行
+
+```powershell
+moon run cmd/main -- sample.md
+```
+
+標準入力にも対応しています。詳しい使い方は`moon run cmd/main -- -h`で確認できます。
