@@ -44,3 +44,23 @@ aube run dev
 MoonBitの変換処理を変更した場合は、再度`aube run build`を実行してからブラウザを再読み込みします。
 
 `web/wasm`はMoonBitをWebAssembly（WASM）へビルドするパッケージです。ビルド時の`wasm-gc`は、ガベージコレクション（Garbage Collection、GC）機能を備えたWASM向けのターゲット名です。`web/server`は確認用のMoonBit製ローカルサーバーです。
+
+## Cloudflare Workersで確認・公開
+
+WranglerはCloudflareのローカル確認・公開用コマンドツールです。
+
+```powershell
+aube run build
+aube run dev:workers
+```
+
+表示されたローカルURLで確認し、`Ctrl+C`で停止します。
+
+初回は`aube run login`でブラウザからCloudflareへのログインを行います。公開・更新時は次を実行します。
+
+```powershell
+aube run build
+aube run deploy
+```
+
+`deploy`は`wrangler.jsonc`で指定した`docs`フォルダを公開します。
