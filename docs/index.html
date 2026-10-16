@@ -168,6 +168,7 @@ println(text)
           });
           event.clipboardData.clearData();
           event.clipboardData.setData("text/plain", template.content.textContent);
+          event.clipboardData.setData("text/html", html);
           event.clipboardData.setData("slack/html", html);
         });
         copy.addEventListener("click", () => {
