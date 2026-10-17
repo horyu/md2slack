@@ -1,6 +1,9 @@
 # md2slack
 
-MoonBitを学びながら、MarkdownテキストをSlackへ貼り付けやすい形式に変換するWebサイトを作るプロジェクトです。
+MarkdownテキストをSlackへ貼り付けやすい形式に変換するWebサイトです。
+
+- [Cloudflare Workersで使う](https://md2slack.tatarabako.workers.dev/)
+- [GitHub Pagesで使う](https://horyu.github.io/md2slack/)
 
 ## 開発ツールの準備
 
