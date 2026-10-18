@@ -210,16 +210,9 @@ fn render_list(
         html += "<li data-stringify-indent=\"\{depth}\" data-stringify-border=\"0\">" +
           render_inline(item)
         index += 1
-        if index < lines.length() {
-          match list_item(lines[index]) {
-            Some((child_depth, _)) if child_depth == depth + 1 => {
-              let (children, next) = render_list(lines, index, child_depth)
-              html += children
-              index = next
-            }
-            _ => ()
-          }
-        }
+        let (children, next) = render_child_lists(lines, index, depth + 1)
+        html += children
+        index = next
         html += "</li>"
       }
       _ => break
@@ -272,24 +265,41 @@ fn render_ordered_list(
         html += "<li data-stringify-indent=\"\{depth}\" data-stringify-border=\"0\">" +
           render_inline(item)
         index += 1
-        if index < lines.length() {
-          match ordered_item(lines[index]) {
-            Some((child_depth, number, _)) if child_depth == depth + 1 => {
-              let (children, next) = render_ordered_list(
-                lines, index, child_depth, number,
-              )
-              html += children
-              index = next
-            }
-            _ => ()
-          }
-        }
+        let (children, next) = render_child_lists(lines, index, depth + 1)
+        html += children
+        index = next
         html += "</li>"
       }
       _ => break
     }
   }
   (html + "</ol>", index)
+}
+
+///|
+/// 戻り値は (子リストのHTML, 次に処理する行の添字)。
+/// 指定した深さの子リストがなければ、HTMLは空文字列、添字は start のまま。
+fn render_child_lists(
+  lines : Array[StringView],
+  start : Int,
+  depth : Int,
+) -> (String, Int) {
+  let mut index = start
+  let mut html = ""
+  while index < lines.length() {
+    let (child, next) = if list_item(lines[index]) is Some((child_depth, _)) &&
+      child_depth == depth {
+      render_list(lines, index, depth)
+    } else if ordered_item(lines[index]) is Some((child_depth, number, _)) &&
+      child_depth == depth {
+      render_ordered_list(lines, index, depth, number)
+    } else {
+      break
+    }
+    html += child
+    index = next
+  }
+  (html, index)
 }
 
 ///|

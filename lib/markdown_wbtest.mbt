@@ -1,4 +1,56 @@
 ///|
+test "番号なしの親から番号付きの子と番号なしの孫を作る" {
+  let markdown =
+    #|- 親
+    #|  3. **子**
+    #|    - `孫`
+    #|  4. 次の子
+    #|- 次の親
+  let expected =
+    #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">親<ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="1" data-border="0" start="3"><li data-stringify-indent="1" data-stringify-border="0"><b data-stringify-type="bold">子</b><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="2" data-border="0"><li data-stringify-indent="2" data-stringify-border="0"><code data-stringify-type="code">孫</code></li></ul></li><li data-stringify-indent="1" data-stringify-border="0">次の子</li></ol></li><li data-stringify-indent="0" data-stringify-border="0">次の親</li></ul>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "番号付きの親から番号なしの子と番号付きの孫を作る" {
+  let markdown =
+    #|2. 親
+    #|  + <子>&
+    #|    5. 孫
+    #|  * 次の子
+    #|3. 次の親
+  let expected =
+    #|<ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="0" data-border="0" start="2"><li data-stringify-indent="0" data-stringify-border="0">親<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="1" data-border="0"><li data-stringify-indent="1" data-stringify-border="0">&lt;子&gt;&amp;<ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="2" data-border="0" start="5"><li data-stringify-indent="2" data-stringify-border="0">孫</li></ol></li><li data-stringify-indent="1" data-stringify-border="0">次の子</li></ul></li><li data-stringify-indent="0" data-stringify-border="0">次の親</li></ol>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "同じ親の中で子リストの種類を切り替え、親や通常行へ戻る" {
+  let markdown =
+    #|- 親
+    #|  - 子1
+    #|  4. 子2
+    #|  - 子3
+    #|- 次の親
+    #|通常行
+  let expected =
+    #|<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="0" data-border="0"><li data-stringify-indent="0" data-stringify-border="0">親<ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="1" data-border="0"><li data-stringify-indent="1" data-stringify-border="0">子1</li></ul><ol data-stringify-type="ordered-list" data-list-tree="true" data-indent="1" data-border="0" start="4"><li data-stringify-indent="1" data-stringify-border="0">子2</li></ol><ul data-stringify-type="unordered-list" data-list-tree="true" data-indent="1" data-border="0"><li data-stringify-indent="1" data-stringify-border="0">子3</li></ul></li><li data-stringify-indent="0" data-stringify-border="0">次の親</li></ul><br>通常行
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "種類が異なる子リストでも階層の飛び越しは通常の文字として残す" {
+  assert_eq(
+    markdown_to_slack_html("- 親\n    1. 飛び越し"),
+    markdown_to_slack_html("- 親") + "<br>    1. 飛び越し",
+  )
+  assert_eq(
+    markdown_to_slack_html("1. 親\n    - 飛び越し"),
+    markdown_to_slack_html("1. 親") + "<br>    - 飛び越し",
+  )
+}
+
+///|
 test "スペースありとなしの二階層の引用を同じ子の引用にまとめる" {
   let markdown =
     #|> 親
