@@ -10,25 +10,37 @@ fn escape_html(text : StringView) -> String {
 }
 
 ///|
-fn render_italic(text : StringView) -> String {
+fn render_italic(text : StringView, marker? : StringView = "*") -> String {
   let mut remaining = text
   let mut html = ""
   while true {
-    match remaining.split_once("*") {
+    match remaining.split_once(marker) {
       None => {
-        html += escape_html(remaining)
+        html += if marker == "*" {
+          render_italic(remaining, marker="_")
+        } else {
+          escape_html(remaining)
+        }
         break
       }
       Some((before, after)) =>
-        match after.split_once("*") {
+        match after.split_once(marker) {
           None => {
-            html += escape_html(remaining)
+            html += if marker == "*" {
+              render_italic(remaining, marker="_")
+            } else {
+              escape_html(remaining)
+            }
             break
           }
           Some((italic, rest)) => {
-            html += escape_html(before)
+            html += if marker == "*" {
+              render_italic(before, marker="_")
+            } else {
+              escape_html(before)
+            }
             if italic.is_empty() {
-              html += "**"
+              html += marker.to_owned() + marker.to_owned()
             } else {
               html += "<i data-stringify-type=\"italic\">" +
                 escape_html(italic) +
@@ -72,23 +84,35 @@ fn render_strike(text : StringView) -> String {
 }
 
 ///|
-fn render_bold(text : StringView) -> String {
+fn render_bold(text : StringView, marker? : StringView = "**") -> String {
   let mut remaining = text
   let mut html = ""
   while true {
-    match remaining.split_once("**") {
+    match remaining.split_once(marker) {
       None => {
-        html += render_strike(remaining)
+        html += if marker == "**" {
+          render_bold(remaining, marker="__")
+        } else {
+          render_strike(remaining)
+        }
         break
       }
       Some((before, after)) =>
-        match after.split_once("**") {
+        match after.split_once(marker) {
           None => {
-            html += render_strike(remaining)
+            html += if marker == "**" {
+              render_bold(remaining, marker="__")
+            } else {
+              render_strike(remaining)
+            }
             break
           }
           Some((bold, rest)) => {
-            html += render_strike(before)
+            html += if marker == "**" {
+              render_bold(before, marker="__")
+            } else {
+              render_strike(before)
+            }
             html += "<b data-stringify-type=\"bold\">" +
               escape_html(bold) +
               "</b>"

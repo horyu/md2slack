@@ -1,4 +1,48 @@
 ///|
+test "アンダースコアの太字と斜体をアスタリスクの表記と並べて変換する" {
+  let markdown = "__太字1__ **太字2** _斜体1_ *斜体2* __太字3__ _斜体3_"
+  let expected =
+    #|<b data-stringify-type="bold">太字1</b> <b data-stringify-type="bold">太字2</b> <i data-stringify-type="italic">斜体1</i> <i data-stringify-type="italic">斜体2</i> <b data-stringify-type="bold">太字3</b> <i data-stringify-type="italic">斜体3</i>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "アンダースコアの太字と斜体内の文字をエスケープする" {
+  let expected =
+    #|<b data-stringify-type="bold">&lt;b&gt;&amp;</b> <i data-stringify-type="italic">&quot;&lt;i&gt;&amp;</i>
+  assert_eq(markdown_to_slack_html("__<b>&__ _\"<i>&_"), expected)
+}
+
+///|
+test "閉じていないアンダースコアと異なる種類の区切りは本文に残す" {
+  assert_eq(markdown_to_slack_html("__未完<&"), "__未完&lt;&amp;")
+  assert_eq(markdown_to_slack_html("_未完<&"), "_未完&lt;&amp;")
+  assert_eq(markdown_to_slack_html("__"), "__")
+  assert_eq(markdown_to_slack_html("*違う_"), "*違う_")
+  assert_eq(markdown_to_slack_html("**違う__"), "**違う__")
+}
+
+///|
+test "コード内のアンダースコアは太字や斜体に変換しない" {
+  let markdown =
+    #|`__太字__ _斜体_`
+    #|```
+    #|__太字__ _斜体_
+    #|```
+  let expected =
+    #|<code data-stringify-type="code">__太字__ _斜体_</code><pre data-stringify-type="pre">__太字__ _斜体_</pre>
+  assert_eq(markdown_to_slack_html(markdown), expected)
+}
+
+///|
+test "リストと引用の中でもアンダースコアの書式を変換する" {
+  assert_eq(
+    markdown_to_slack_html("- __太字__\n> _斜体_"),
+    markdown_to_slack_html("- **太字**\n> *斜体*"),
+  )
+}
+
+///|
 test "番号なしの親から番号付きの子と番号なしの孫を作る" {
   let markdown =
     #|- 親
