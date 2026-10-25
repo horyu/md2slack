@@ -1,6 +1,6 @@
 ///|
 // Cの標準ライブラリのexitを呼び、終了コードを指定する。
-extern "c" fn exit(code : Int) = "exit"
+extern "c" fn exit(code : Int32) = "exit"
 
 ///|
 async fn main {

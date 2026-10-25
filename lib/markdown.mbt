@@ -10,7 +10,7 @@ fn escape_html(text : StringView) -> String {
 }
 
 ///|
-fn render_italic(text : StringView, marker? : StringView = "*") -> String {
+fn render_italic(text : StringView, marker~ : StringView = "*") -> String {
   let mut remaining = text
   let mut html = ""
   while true {
@@ -84,7 +84,7 @@ fn render_strike(text : StringView) -> String {
 }
 
 ///|
-fn render_bold(text : StringView, marker? : StringView = "**") -> String {
+fn render_bold(text : StringView, marker~ : StringView = "**") -> String {
   let mut remaining = text
   let mut html = ""
   while true {
@@ -202,7 +202,7 @@ fn render_inline(text : StringView) -> String {
 ///|
 /// 戻り値は Some((階層の深さ, 項目の本文))。箇条書きの行でなければ None。
 /// 深さは先頭のスペース2個につき1増える。本文には字下げと箇条書きの記号・直後のスペースを含まない。
-fn list_item(line : StringView) -> (Int, StringView)? {
+fn list_item(line : StringView) -> (Int32, StringView)? {
   let mut remaining = line
   let mut depth = 0
   while remaining.has_prefix("  ") {
@@ -223,9 +223,9 @@ fn list_item(line : StringView) -> (Int, StringView)? {
 /// 最後まで処理した場合、添字は lines.length() になる。
 fn render_list(
   lines : Array[StringView],
-  start : Int,
-  depth : Int,
-) -> (String, Int) {
+  start : Int32,
+  depth : Int32,
+) -> (String, Int32) {
   let mut index = start
   let mut html = "<ul data-stringify-type=\"unordered-list\" data-list-tree=\"true\" data-indent=\"\{depth}\" data-border=\"0\">"
   while index < lines.length() {
@@ -248,7 +248,7 @@ fn render_list(
 ///|
 /// 戻り値は Some((階層の深さ, 番号の文字列, 項目の本文))。番号付きリストの行でなければ None。
 /// 深さは先頭のスペース2個につき1増える。本文には字下げ・番号・「. 」を含まない。
-fn ordered_item(line : StringView) -> (Int, StringView, StringView)? {
+fn ordered_item(line : StringView) -> (Int32, StringView, StringView)? {
   let mut remaining = line
   let mut depth = 0
   while remaining.has_prefix("  ") {
@@ -263,7 +263,7 @@ fn ordered_item(line : StringView) -> (Int, StringView, StringView)? {
     return None
   }
   for digit in number {
-    if !(digit is ('0'..='9')) {
+    if !(digit is ('0'..<='9')) {
       return None
     }
   }
@@ -275,10 +275,10 @@ fn ordered_item(line : StringView) -> (Int, StringView, StringView)? {
 /// 最後まで処理した場合、添字は lines.length() になる。
 fn render_ordered_list(
   lines : Array[StringView],
-  start : Int,
-  depth : Int,
+  start : Int32,
+  depth : Int32,
   start_number : StringView,
-) -> (String, Int) {
+) -> (String, Int32) {
   let mut index = start
   let mut html = "<ol data-stringify-type=\"ordered-list\" data-list-tree=\"true\" data-indent=\"\{depth}\" data-border=\"0\" start=\"" +
     start_number.to_owned() +
@@ -305,9 +305,9 @@ fn render_ordered_list(
 /// 指定した深さの子リストがなければ、HTMLは空文字列、添字は start のまま。
 fn render_child_lists(
   lines : Array[StringView],
-  start : Int,
-  depth : Int,
-) -> (String, Int) {
+  start : Int32,
+  depth : Int32,
+) -> (String, Int32) {
   let mut index = start
   let mut html = ""
   while index < lines.length() {
@@ -356,7 +356,7 @@ fn quote_content(line : StringView) -> StringView {
 }
 
 ///|
-fn render_quote(text : StringView, depth : Int) -> String {
+fn render_quote(text : StringView, depth : Int32) -> String {
   let lines = text.split("\n").to_array()
   let mut index = 0
   let mut html = ""
