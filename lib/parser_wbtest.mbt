@@ -59,12 +59,31 @@ test "閉じられていないコードの区切りを文字として残す" {
 
 ///|
 test "コードと太字が両方閉じられていない場合も元の順序で文字を残す" {
-  assert_eq(parse([T::DoubleAsterisk, T::Text("前 "), T::Backtick, T::Text("コード")]), [
-    N::Text("**"),
-    N::Text("前 "),
-    N::Text("`"),
-    N::Text("コード"),
-  ])
+  assert_eq(
+    parse([
+      T::DoubleAsterisk,
+      T::Text("前 "),
+      T::Backtick,
+      T::Text("コード"),
+    ]),
+    [N::Text("**"), N::Text("前 "), N::Text("`"), N::Text("コード")],
+  )
+}
+
+///|
+test "複数のコードを前の内容を引き継がずに組み立てる" {
+  assert_eq(
+    parse([
+      T::Backtick,
+      T::Text("一つ目"),
+      T::Backtick,
+      T::Text("と"),
+      T::Backtick,
+      T::Text("二つ目"),
+      T::Backtick,
+    ]),
+    [N::Code("一つ目"), N::Text("と"), N::Code("二つ目")],
+  )
 }
 
 ///|

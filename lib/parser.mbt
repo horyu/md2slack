@@ -31,53 +31,52 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
   let mut code = false
   let mut code_tmp = ""
   for token in tokens {
-    match token {
-      Text(s) => {
-        if code {
-          code_tmp += s
-        } else if bold {
-          bold_tmp.push(Text(s))
-        } else {
-          nodes.push(Text(s))
+    if code {
+      match token {
+        Text(s) => code_tmp += s
+        DoubleAsterisk => code_tmp += "**"
+        Backtick => {
+          push_by_bold(bold, bold_tmp, nodes, Code(code_tmp))
+          code_tmp = ""
+          code = false
         }
       }
+      continue
+    }
+    match token {
+      Text(s) => push_by_bold(bold, bold_tmp, nodes, Text(s))
       DoubleAsterisk => {
-        if code {
-          code_tmp += "**"
-          continue
-        }
         if bold {
           nodes.push(Bold(bold_tmp))
           bold_tmp = []
         }
         bold = !bold
       }
-      Backtick => {
-        if code {
-          if bold {
-            bold_tmp.push(Code(code_tmp))
-          } else {
-            nodes.push(Code(code_tmp))
-          }
-          code_tmp = ""
-        }
-        code = !code
-      }
+      Backtick => code = true
     }
   }
   // 未閉鎖のコードを先に戻し、その後で未閉鎖の太字を戻す。
   if code {
-    if bold {
-      bold_tmp.push(Node::Text("`"))
-      bold_tmp.push(Node::Text(code_tmp))
-    } else {
-      nodes.push(Node::Text("`"))
-      nodes.push(Node::Text(code_tmp))
-    }
+    push_by_bold(bold, bold_tmp, nodes, Node::Text("`"))
+    push_by_bold(bold, bold_tmp, nodes, Node::Text(code_tmp))
   }
   if bold {
     nodes.push(Node::Text("**"))
     nodes.push_iter(bold_tmp.iter())
   }
   nodes
+}
+
+///|
+fn push_by_bold(
+  bold : Bool,
+  bold_tmp : Array[Node],
+  nodes : Array[Node],
+  node : Node,
+) -> Unit {
+  if bold {
+    bold_tmp.push(node)
+  } else {
+    nodes.push(node)
+  }
 }
