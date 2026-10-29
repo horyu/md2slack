@@ -39,3 +39,17 @@ test "二重アスタリスクとバッククォートの混在をトークン�
     T::DoubleAsterisk,
   ])
 }
+
+///|
+test "二重チルダを文字と区別してトークン化する" {
+  assert_eq(tokenize("~~取り消し~~"), [
+    T::DoubleTilde,
+    T::Text("取り消し"),
+    T::DoubleTilde,
+  ])
+}
+
+///|
+test "1つのチルダを文字としてトークン化する" {
+  assert_eq(tokenize("a~b"), [T::Text("a~b")])
+}

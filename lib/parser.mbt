@@ -2,6 +2,7 @@
 enum Node {
   Text(String)
   Bold(Array[Node])
+  Strikethrough(Array[Node])
   Code(String)
 } derive(Eq, Debug)
 
@@ -14,10 +15,47 @@ pub extend Node with Eq::{equal, not_equal}
 pub extend Node with Debug::{to_repr}
 
 ///|
+enum StackType {
+  Bold
+  Strikethrough
+} derive(Eq, Debug)
+
+///|
+#deprecated
+pub extend StackType with Eq::{equal, not_equal}
+
+///|
+#deprecated
+pub extend StackType with Debug::{to_repr}
+
+///|
+struct ParsingNode {
+  kind : StackType
+  children : Array[Node]
+} derive(Eq, Debug)
+
+///|
+#deprecated
+pub extend ParsingNode with Eq::{equal, not_equal}
+
+///|
+#deprecated
+pub extend ParsingNode with Debug::{to_repr}
+
+///|
+fn to_node(parsing_node : ParsingNode) -> Node {
+  match parsing_node.kind {
+    Bold => Bold(parsing_node.children)
+    Strikethrough => Strikethrough(parsing_node.children)
+  }
+}
+
+///|
 fn to_html(node : Node) -> String {
   match node {
     Text(s) => escape_html(s)
     Bold(nodes) => "<b>" + nodes.map(to_html).join("") + "</b>"
+    Strikethrough(nodes) => "<s>" + nodes.map(to_html).join("") + "</s>"
     Code(s) => "<code>" + escape_html(s) + "</code>"
   }
 }
@@ -26,8 +64,7 @@ fn to_html(node : Node) -> String {
 #warnings("-unused_value")
 fn parse(tokens : Array[Token]) -> Array[Node] {
   let nodes : Array[Node] = []
-  let mut bold = false
-  let mut bold_tmp : Array[Node] = []
+  let stack : Array[ParsingNode] = []
   let mut code = false
   let mut code_tmp = ""
   for token in tokens {
@@ -35,8 +72,9 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
       match token {
         Text(s) => code_tmp += s
         DoubleAsterisk => code_tmp += "**"
+        DoubleTilde => code_tmp += "~~"
         Backtick => {
-          push_by_bold(bold, bold_tmp, nodes, Code(code_tmp))
+          push_node(stack, nodes, Node::Code(code_tmp))
           code_tmp = ""
           code = false
         }
@@ -44,39 +82,74 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
       continue
     }
     match token {
-      Text(s) => push_by_bold(bold, bold_tmp, nodes, Text(s))
-      DoubleAsterisk => {
-        if bold {
-          nodes.push(Bold(bold_tmp))
-          bold_tmp = []
-        }
-        bold = !bold
-      }
+      Text(s) => push_node(stack, nodes, Node::Text(s))
+      DoubleAsterisk => push_or_close_by_type(stack, nodes, StackType::Bold)
+      DoubleTilde =>
+        push_or_close_by_type(stack, nodes, StackType::Strikethrough)
       Backtick => code = true
     }
   }
-  // 未閉鎖のコードを先に戻し、その後で未閉鎖の太字を戻す。
+  // 未閉鎖のコードを先に戻し、その後で書式を内側から順に戻す。
   if code {
-    push_by_bold(bold, bold_tmp, nodes, Node::Text("`"))
-    push_by_bold(bold, bold_tmp, nodes, Node::Text(code_tmp))
+    push_node(stack, nodes, Node::Text("`"))
+    push_node(stack, nodes, Node::Text(code_tmp))
   }
-  if bold {
-    nodes.push(Node::Text("**"))
-    nodes.push_iter(bold_tmp.iter())
+  while !stack.is_empty() {
+    restore_unclosed_node(stack, nodes)
   }
   nodes
 }
 
 ///|
-fn push_by_bold(
-  bold : Bool,
-  bold_tmp : Array[Node],
+// 正しく対応する入れ子を対象とする。記号が交差する場合の解釈は未対応。
+fn push_or_close_by_type(
+  stack : Array[ParsingNode],
+  nodes : Array[Node],
+  stack_type : StackType,
+) -> Unit {
+  if stack.last() is Some(parsing_node) && parsing_node.kind == stack_type {
+    close_node(stack, nodes)
+  } else {
+    stack.push(ParsingNode::{ kind: stack_type, children: [], })
+  }
+}
+
+///|
+fn push_node(
+  stack : Array[ParsingNode],
   nodes : Array[Node],
   node : Node,
 ) -> Unit {
-  if bold {
-    bold_tmp.push(node)
+  if stack.last() is Some(parsing_node) {
+    parsing_node.children.push(node)
   } else {
     nodes.push(node)
+  }
+}
+
+///|
+fn close_node(stack : Array[ParsingNode], nodes : Array[Node]) -> Unit {
+  if stack.pop() is Some(parsing_node) {
+    push_node(stack, nodes, to_node(parsing_node))
+  }
+}
+
+///|
+fn restore_unclosed_node(
+  stack : Array[ParsingNode],
+  nodes : Array[Node],
+) -> Unit {
+  if stack.pop() is Some(parsing_node) {
+    push_node(
+      stack,
+      nodes,
+      match parsing_node.kind {
+        StackType::Bold => Node::Text("**")
+        StackType::Strikethrough => Node::Text("~~")
+      },
+    )
+    for child in parsing_node.children {
+      push_node(stack, nodes, child)
+    }
   }
 }
