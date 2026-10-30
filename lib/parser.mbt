@@ -1,20 +1,4 @@
 ///|
-enum Node {
-  Text(String)
-  Bold(Array[Node])
-  Strikethrough(Array[Node])
-  Code(String)
-} derive(Eq, Debug)
-
-///|
-#deprecated
-pub extend Node with Eq::{equal, not_equal}
-
-///|
-#deprecated
-pub extend Node with Debug::{to_repr}
-
-///|
 enum StackType {
   Bold
   Strikethrough
@@ -47,16 +31,6 @@ fn to_node(parsing_node : ParsingNode) -> Node {
   match parsing_node.kind {
     Bold => Bold(parsing_node.children)
     Strikethrough => Strikethrough(parsing_node.children)
-  }
-}
-
-///|
-fn to_html(node : Node) -> String {
-  match node {
-    Text(s) => escape_html(s)
-    Bold(nodes) => "<b>" + nodes.map(to_html).join("") + "</b>"
-    Strikethrough(nodes) => "<s>" + nodes.map(to_html).join("") + "</s>"
-    Code(s) => "<code>" + escape_html(s) + "</code>"
   }
 }
 
