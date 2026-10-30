@@ -1,0 +1,136 @@
+lockfile_version: '1'
+apm_version: 0.35.0
+dependencies:
+- repo_url: microsoft/apm
+  name: apm-guide
+  host: github.com
+  resolved_commit: 2920043258932f0f67e6f01df7b9047eb42f358c
+  version: 1.0.0
+  virtual_path: packages/apm-guide
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .agents/skills/apm-usage
+  - .agents/skills/apm-usage/SKILL.md
+  - .agents/skills/apm-usage/authentication.md
+  - .agents/skills/apm-usage/commands.md
+  - .agents/skills/apm-usage/dependencies.md
+  - .agents/skills/apm-usage/governance.md
+  - .agents/skills/apm-usage/installation.md
+  - .agents/skills/apm-usage/package-authoring.md
+  - .agents/skills/apm-usage/troubleshooting.md
+  - .agents/skills/apm-usage/workflow.md
+  - .codex/agents/apm-expert.toml
+  deployed_file_hashes:
+    .agents/skills/apm-usage/SKILL.md: sha256:715b6d3497d5ca30f4751463091b8ff7cd85dc51e375d2176aea8f0867081c38
+    .agents/skills/apm-usage/authentication.md: sha256:253f932e324d5e6fe5209d8271764dc5512a9cc1db8ed2a490fc6bf94675a4b0
+    .agents/skills/apm-usage/commands.md: sha256:b832421add4f49b56658a5571825e188d75a0a93fa4c4b53c8c9292b6af33ea0
+    .agents/skills/apm-usage/dependencies.md: sha256:28822c38deb16a5c7fceaf3851fd7530d894c37b0f95853b86c2fb956a84ab73
+    .agents/skills/apm-usage/governance.md: sha256:968670a858801f4576746fbe86affacf4cf27296f634ad9008f58bcba22b2409
+    .agents/skills/apm-usage/installation.md: sha256:c70544c5d1f85102c5e144ac6ae1ca68fcf8ba6a8323cb2ca6adc840d13aa960
+    .agents/skills/apm-usage/package-authoring.md: sha256:00983812289ec13ac9ad84f57148c5cfd3ff5af479c26a42caffc9d6674e14d3
+    .agents/skills/apm-usage/troubleshooting.md: sha256:2c6f13b1a1758b84305f1d11e2eeb096896a02851de1e24dde644783862667cc
+    .agents/skills/apm-usage/workflow.md: sha256:1bbb710fa9fd710aa2258aea52f6d905c6a2b3d366a1fdc723b028b4bfd2dbae
+    .codex/agents/apm-expert.toml: sha256:0b4bec64f7c6ab70df3841237928eaccfb927789d45300870ce56163230498c4
+  content_hash: sha256:c3452ad563adbfadfe9b73f30a76cdbab8635109a8e7e2af799c20737a76d7b3
+  declared_license: MIT
+deployments:
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: null
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:715b6d3497d5ca30f4751463091b8ff7cd85dc51e375d2176aea8f0867081c38
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/authentication.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:253f932e324d5e6fe5209d8271764dc5512a9cc1db8ed2a490fc6bf94675a4b0
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/commands.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:b832421add4f49b56658a5571825e188d75a0a93fa4c4b53c8c9292b6af33ea0
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/dependencies.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:28822c38deb16a5c7fceaf3851fd7530d894c37b0f95853b86c2fb956a84ab73
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/governance.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:968670a858801f4576746fbe86affacf4cf27296f634ad9008f58bcba22b2409
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/installation.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:c70544c5d1f85102c5e144ac6ae1ca68fcf8ba6a8323cb2ca6adc840d13aa960
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/package-authoring.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:00983812289ec13ac9ad84f57148c5cfd3ff5af479c26a42caffc9d6674e14d3
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/troubleshooting.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:2c6f13b1a1758b84305f1d11e2eeb096896a02851de1e24dde644783862667cc
+- kind: project-relative
+  target: codex
+  value: .agents/skills/apm-usage/workflow.md
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:1bbb710fa9fd710aa2258aea52f6d905c6a2b3d366a1fdc723b028b4bfd2dbae
+- kind: project-relative
+  target: codex
+  value: .codex/agents/apm-expert.toml
+  runtime: null
+  scope: project
+  owners:
+  - microsoft/apm/packages/apm-guide
+  active_owner: microsoft/apm/packages/apm-guide
+  content_hash: sha256:0b4bec64f7c6ab70df3841237928eaccfb927789d45300870ce56163230498c4

@@ -1,3 +1,4 @@
 [tools]
+apm = "latest"
 node = "26"
 "packslip:github.com/aubepkg/aube" = "2"

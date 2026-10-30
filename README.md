@@ -41,7 +41,13 @@ mise trust
 mise install
 ```
 
-Node.jsとaubeのバージョンは`mise.toml`で指定しています。aubeはパッケージの管理と、`package.json`に定義したコマンドの実行に使用します。
+Node.js、aube、Agent Package Manager（APM：AIエージェント用のSkillや指示を管理するツール）のバージョンは`mise.toml`で指定しています。aubeはパッケージの管理と、`package.json`に定義したコマンドの実行に使用します。
+
+AIエージェント用のSkillとエージェント定義はGitで管理せず、clone後に次のコマンドで`apm.lock.yaml`に固定した内容を復元します。
+
+```powershell
+apm install --frozen
+```
 
 ## チェックとテスト
 

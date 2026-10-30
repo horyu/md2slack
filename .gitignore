@@ -2,3 +2,8 @@
 /.mooncakes/
 /.wrangler/
 node_modules/
+
+# APM dependencies
+apm_modules/
+.agents/skills/*
+/.codex/agents/*
