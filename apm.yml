@@ -10,6 +10,10 @@ targets:
 dependencies:
   apm:
     - microsoft/apm/packages/apm-guide
+    - git: moonbitlang/skills
+      skills:
+        - moonbit-orientation
+    - moonbitlang/moonbit-agent-guide/moonbit-agent-guide
   mcp: []
 includes: auto
 scripts: {}
