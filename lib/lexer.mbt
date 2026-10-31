@@ -23,14 +23,14 @@ fn tokenize(input : String) -> Array[Token] {
   let mut pos = 0
   let mut text_start = 0
   while pos < len {
-    if input[pos:].has_prefix("**") {
+    if input[pos] == '*' && input.get(pos + 1) == Some('*') {
       if text_start < pos {
         tokens.push(Token::Text(input[text_start:pos].to_owned()))
       }
       text_start = pos + 2
       tokens.push(Token::DoubleAsterisk)
       pos += 2
-    } else if input[pos:].has_prefix("~~") {
+    } else if input[pos] == '~' && input.get(pos + 1) == Some('~') {
       if text_start < pos {
         tokens.push(Token::Text(input[text_start:pos].to_owned()))
       }
