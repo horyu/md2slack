@@ -39,18 +39,16 @@ fn ParsingNode::to_node(self : Self) -> Node {
 fn parse(tokens : Array[Token]) -> Array[Node] {
   let nodes : Array[Node] = []
   let stack : Array[ParsingNode] = []
-  let mut code = false
-  let mut code_tmp = ""
+  let mut code : StringBuilder? = None
   for token in tokens {
-    if code {
+    if code is Some(code_tmp) {
       match token {
-        Text(s) => code_tmp += s
-        DoubleAsterisk => code_tmp += "**"
-        DoubleTilde => code_tmp += "~~"
+        Text(s) => code_tmp.write_string(s)
+        DoubleAsterisk => code_tmp.write_string("**")
+        DoubleTilde => code_tmp.write_string("~~")
         Backtick => {
-          push_node(stack, nodes, Node::Code(code_tmp))
-          code_tmp = ""
-          code = false
+          push_node(stack, nodes, Node::Code(code_tmp.to_string()))
+          code = None
         }
       }
       continue
@@ -60,13 +58,13 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
       DoubleAsterisk => push_or_close_by_type(stack, nodes, StackType::Bold)
       DoubleTilde =>
         push_or_close_by_type(stack, nodes, StackType::Strikethrough)
-      Backtick => code = true
+      Backtick => code = Some(StringBuilder())
     }
   }
   // 未閉鎖のコードを先に戻し、その後で書式を内側から順に戻す。
-  if code {
+  if code is Some(code_tmp) {
     push_node(stack, nodes, Node::Text("`"))
-    push_node(stack, nodes, Node::Text(code_tmp))
+    push_node(stack, nodes, Node::Text(code_tmp.to_string()))
   }
   while !stack.is_empty() {
     restore_unclosed_node(stack, nodes)
