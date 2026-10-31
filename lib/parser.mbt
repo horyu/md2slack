@@ -27,10 +27,10 @@ pub extend ParsingNode with Eq::{equal, not_equal}
 pub extend ParsingNode with Debug::{to_repr}
 
 ///|
-fn to_node(parsing_node : ParsingNode) -> Node {
-  match parsing_node.kind {
-    Bold => Bold(parsing_node.children)
-    Strikethrough => Strikethrough(parsing_node.children)
+fn ParsingNode::to_node(self : Self) -> Node {
+  match self.kind {
+    Bold => Bold(self.children)
+    Strikethrough => Strikethrough(self.children)
   }
 }
 
@@ -104,7 +104,7 @@ fn push_node(
 ///|
 fn close_node(stack : Array[ParsingNode], nodes : Array[Node]) -> Unit {
   if stack.pop() is Some(parsing_node) {
-    push_node(stack, nodes, to_node(parsing_node))
+    push_node(stack, nodes, parsing_node.to_node())
   }
 }
 

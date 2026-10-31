@@ -138,17 +138,14 @@ test "コード内の二重チルダを取り消し線として解釈しない" 
 ///|
 test "ParsingNodeをNodeへ変換する" {
   assert_eq(
-    to_node(ParsingNode::{
-      kind: StackType::Bold,
-      children: [N::Text("太字")],
-    }),
+    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], }.to_node(),
     N::Bold([N::Text("太字")]),
   )
   assert_eq(
-    to_node(ParsingNode::{
+    ParsingNode::{
       kind: StackType::Strikethrough,
       children: [N::Text("取り消し")],
-    }),
+    }.to_node(),
     N::Strikethrough([N::Text("取り消し")]),
   )
 }
