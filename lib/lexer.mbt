@@ -23,29 +23,32 @@ fn tokenize(input : String) -> Array[Token] {
   let mut pos = 0
   let mut text_start = 0
   while pos < len {
-    if input[pos] == '*' && input.get(pos + 1) == Some('*') {
-      if text_start < pos {
-        tokens.push(Token::Text(input[text_start:pos].to_owned()))
+    match (input[pos], input.get(pos + 1)) {
+      ('*', Some('*')) => {
+        if text_start < pos {
+          tokens.push(Token::Text(input[text_start:pos].to_owned()))
+        }
+        text_start = pos + 2
+        tokens.push(Token::DoubleAsterisk)
+        pos += 2
       }
-      text_start = pos + 2
-      tokens.push(Token::DoubleAsterisk)
-      pos += 2
-    } else if input[pos] == '~' && input.get(pos + 1) == Some('~') {
-      if text_start < pos {
-        tokens.push(Token::Text(input[text_start:pos].to_owned()))
+      ('~', Some('~')) => {
+        if text_start < pos {
+          tokens.push(Token::Text(input[text_start:pos].to_owned()))
+        }
+        text_start = pos + 2
+        tokens.push(Token::DoubleTilde)
+        pos += 2
       }
-      text_start = pos + 2
-      tokens.push(Token::DoubleTilde)
-      pos += 2
-    } else if input[pos] == '`' {
-      if text_start < pos {
-        tokens.push(Token::Text(input[text_start:pos].to_owned()))
+      ('`', _) => {
+        if text_start < pos {
+          tokens.push(Token::Text(input[text_start:pos].to_owned()))
+        }
+        text_start = pos + 1
+        tokens.push(Token::Backtick)
+        pos += 1
       }
-      text_start = pos + 1
-      tokens.push(Token::Backtick)
-      pos += 1
-    } else {
-      pos += 1
+      _ => pos += 1
     }
   }
   if text_start < pos {
