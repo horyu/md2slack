@@ -24,40 +24,22 @@ fn tokenize(input : String) -> Array[Token] {
   let mut pos = 0
   let mut text_start = 0
   while pos < len {
-    match (input[pos], input.get(pos + 1)) {
-      ('*', Some('*')) => {
-        if text_start < pos {
-          tokens.push(Token::Text(input[text_start:pos].to_owned()))
-        }
-        text_start = pos + 2
-        tokens.push(Token::DoubleAsterisk)
-        pos += 2
+    let matched_token = match (input[pos], input.get(pos + 1)) {
+      ('*', Some('*')) => Some((Token::DoubleAsterisk, 2))
+      ('*', _) => Some((Token::SingleAsterisk, 1))
+      ('~', Some('~')) => Some((Token::DoubleTilde, 2))
+      ('`', _) => Some((Token::Backtick, 1))
+      _ => None
+    }
+    if matched_token is Some((token, advance)) {
+      if text_start < pos {
+        tokens.push(Token::Text(input[text_start:pos].to_owned()))
       }
-      ('*', _) => {
-        if text_start < pos {
-          tokens.push(Token::Text(input[text_start:pos].to_owned()))
-        }
-        text_start = pos + 1
-        tokens.push(Token::SingleAsterisk)
-        pos += 1
-      }
-      ('~', Some('~')) => {
-        if text_start < pos {
-          tokens.push(Token::Text(input[text_start:pos].to_owned()))
-        }
-        text_start = pos + 2
-        tokens.push(Token::DoubleTilde)
-        pos += 2
-      }
-      ('`', _) => {
-        if text_start < pos {
-          tokens.push(Token::Text(input[text_start:pos].to_owned()))
-        }
-        text_start = pos + 1
-        tokens.push(Token::Backtick)
-        pos += 1
-      }
-      _ => pos += 1
+      tokens.push(token)
+      pos += advance
+      text_start = pos
+    } else {
+      pos += 1
     }
   }
   if text_start < pos {
