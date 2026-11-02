@@ -154,6 +154,28 @@ test "太字の中の取り消し線の構造を組み立てる" {
 }
 
 ///|
+test "太字の中の斜体の構造を組み立てる" {
+  assert_eq(parse(tokenize("**太字 *斜体* 続き**")), [
+    N::Bold([
+      N::Text("太字 "),
+      N::Italic([N::Text("斜体")]),
+      N::Text(" 続き"),
+    ]),
+  ])
+}
+
+///|
+test "斜体の中の太字の構造を組み立てる" {
+  assert_eq(parse(tokenize("*斜体 **太字** 続き*")), [
+    N::Italic([
+      N::Text("斜体 "),
+      N::Bold([N::Text("太字")]),
+      N::Text(" 続き"),
+    ]),
+  ])
+}
+
+///|
 test "コード内の二重チルダを取り消し線として解釈しない" {
   assert_eq(parse(tokenize("`~~取り消し~~`")), [N::Code("~~取り消し~~")])
 }
