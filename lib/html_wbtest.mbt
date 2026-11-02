@@ -43,15 +43,22 @@ test "太字の中の取り消し線をHTMLへ変換する" {
 }
 
 ///|
+test "斜体をHTMLへ変換する" {
+  assert_eq(Node::Italic([Node::Text("斜体")]).to_html(), "<i>斜体</i>")
+}
+
+///|
 test "Markdown文字列をトークンと構造を経由してHTMLへ変換する" {
   assert_eq(
-    parse(tokenize("前 **太字** 後")).map(n => n.to_html()).join(""),
+    parse(tokenize("前 **太字** 後")).map(Node::to_html).join(""),
     "前 <b>太字</b> 後",
   )
   assert_eq(
-    parse(tokenize("**太字 `コード` 続き**"))
-    .map(n => n.to_html())
-    .join(""),
+    parse(tokenize("**太字 `コード` 続き**")).map(Node::to_html).join(""),
     "<b>太字 <code>コード</code> 続き</b>",
+  )
+  assert_eq(
+    parse(tokenize("*斜体*")).map(Node::to_html).join(""),
+    "<i>斜体</i>",
   )
 }

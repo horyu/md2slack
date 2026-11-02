@@ -58,6 +58,16 @@ test "閉じられていないコードの区切りを文字として残す" {
 }
 
 ///|
+test "閉じられていない斜体の区切りを文字として残す" {
+  assert_eq(parse([T::SingleAsterisk]), [N::Text("*")])
+  assert_eq(parse([T::Text("前 "), T::SingleAsterisk, T::Text("斜体")]), [
+    N::Text("前 "),
+    N::Text("*"),
+    N::Text("斜体"),
+  ])
+}
+
+///|
 test "コードと太字が両方閉じられていない場合も元の順序で文字を残す" {
   assert_eq(
     parse([
@@ -101,6 +111,11 @@ test "文字列からコードの構造を組み立てる" {
 }
 
 ///|
+test "文字列から斜体の構造を組み立てる" {
+  assert_eq(parse(tokenize("*斜体*")), [N::Italic([N::Text("斜体")])])
+}
+
+///|
 test "太字の中にコードの構造を組み立てる" {
   assert_eq(parse(tokenize("**太字 `コード` 続き**")), [
     N::Bold([N::Text("太字 "), N::Code("コード"), N::Text(" 続き")]),
@@ -108,7 +123,15 @@ test "太字の中にコードの構造を組み立てる" {
 }
 
 ///|
-test "コード内の二重アスタリスクを太字として解釈しない" {
+test "斜体の中にコードの構造を組み立てる" {
+  assert_eq(parse(tokenize("*斜体 `コード` 続き*")), [
+    N::Italic([N::Text("斜体 "), N::Code("コード"), N::Text(" 続き")]),
+  ])
+}
+
+///|
+test "コード内のアスタリスクを文字として扱う" {
+  assert_eq(parse(tokenize("`*斜体*`")), [N::Code("*斜体*")])
   assert_eq(parse(tokenize("`**コード**`")), [N::Code("**コード**")])
 }
 

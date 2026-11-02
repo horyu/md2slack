@@ -3,6 +3,7 @@ enum Node {
   Text(String)
   Bold(Array[Node])
   Strikethrough(Array[Node])
+  Italic(Array[Node])
   Code(String)
 } derive(Eq, Debug)
 

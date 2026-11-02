@@ -1,6 +1,7 @@
 ///|
 enum Token {
   Text(String)
+  SingleAsterisk
   DoubleAsterisk
   DoubleTilde
   Backtick
@@ -31,6 +32,14 @@ fn tokenize(input : String) -> Array[Token] {
         text_start = pos + 2
         tokens.push(Token::DoubleAsterisk)
         pos += 2
+      }
+      ('*', _) => {
+        if text_start < pos {
+          tokens.push(Token::Text(input[text_start:pos].to_owned()))
+        }
+        text_start = pos + 1
+        tokens.push(Token::SingleAsterisk)
+        pos += 1
       }
       ('~', Some('~')) => {
         if text_start < pos {

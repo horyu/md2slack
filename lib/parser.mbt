@@ -1,5 +1,6 @@
 ///|
 enum StackType {
+  Italic
   Bold
   Strikethrough
 } derive(Eq, Debug)
@@ -29,6 +30,7 @@ pub extend ParsingNode with Debug::{to_repr}
 ///|
 fn ParsingNode::to_node(self : Self) -> Node {
   match self.kind {
+    Italic => Italic(self.children)
     Bold => Bold(self.children)
     Strikethrough => Strikethrough(self.children)
   }
@@ -44,6 +46,7 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
     if code is Some(code_tmp) {
       match token {
         Text(s) => code_tmp.write_string(s)
+        SingleAsterisk => code_tmp.write_string("*")
         DoubleAsterisk => code_tmp.write_string("**")
         DoubleTilde => code_tmp.write_string("~~")
         Backtick => {
@@ -55,6 +58,7 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
     }
     match token {
       Text(s) => push_node(stack, nodes, Node::Text(s))
+      SingleAsterisk => push_or_close_by_type(stack, nodes, StackType::Italic)
       DoubleAsterisk => push_or_close_by_type(stack, nodes, StackType::Bold)
       DoubleTilde =>
         push_or_close_by_type(stack, nodes, StackType::Strikethrough)
@@ -116,6 +120,7 @@ fn restore_unclosed_node(
       stack,
       nodes,
       match parsing_node.kind {
+        StackType::Italic => Node::Text("*")
         StackType::Bold => Node::Text("**")
         StackType::Strikethrough => Node::Text("~~")
       },
