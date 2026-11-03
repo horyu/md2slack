@@ -61,4 +61,16 @@ test "Markdown文字列をトークンと構造を経由してHTMLへ変換す�
     parse(tokenize("*斜体*")).map(Node::to_html).join(""),
     "<i>斜体</i>",
   )
+  assert_eq(
+    parse(tokenize("_斜体_")).map(Node::to_html).join(""),
+    "<i>斜体</i>",
+  )
+  assert_eq(
+    parse(tokenize("__太字__")).map(Node::to_html).join(""),
+    "<b>太字</b>",
+  )
+  assert_eq(
+    parse(tokenize("`__コード__`")).map(Node::to_html).join(""),
+    "<code>__コード__</code>",
+  )
 }

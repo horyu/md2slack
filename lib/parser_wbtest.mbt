@@ -183,7 +183,10 @@ test "コード内の二重チルダを取り消し線として解釈しない" 
 ///|
 test "ParsingNodeをNodeへ変換する" {
   assert_eq(
-    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], }.to_node(),
+    ParsingNode::{
+      kind: StackType::AsteriskBold,
+      children: [N::Text("太字")],
+    }.to_node(),
     N::Bold([N::Text("太字")]),
   )
   assert_eq(
@@ -205,7 +208,7 @@ test "スタックが空なら最終結果にノードを追加する" {
 ///|
 test "スタック末尾の子にだけノードを追加する" {
   let stack = [
-    ParsingNode::{ kind: StackType::Bold, children: [], },
+    ParsingNode::{ kind: StackType::AsteriskBold, children: [], },
     ParsingNode::{ kind: StackType::Strikethrough, children: [], },
   ]
   let nodes : Array[Node] = []
@@ -227,7 +230,10 @@ test "空のスタックを閉じても結果は変わらない" {
 ///|
 test "最後の書式を閉じて最終結果に追加する" {
   let stack = [
-    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], },
+    ParsingNode::{
+      kind: StackType::AsteriskBold,
+      children: [N::Text("太字")],
+    },
   ]
   let nodes : Array[Node] = []
   close_node(stack, nodes)
@@ -238,7 +244,10 @@ test "最後の書式を閉じて最終結果に追加する" {
 ///|
 test "内側の書式を閉じて外側の子に追加する" {
   let stack = [
-    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], },
+    ParsingNode::{
+      kind: StackType::AsteriskBold,
+      children: [N::Text("太字")],
+    },
     ParsingNode::{
       kind: StackType::Strikethrough,
       children: [N::Text("取り消し")],
@@ -248,7 +257,7 @@ test "内側の書式を閉じて外側の子に追加する" {
   close_node(stack, nodes)
   assert_eq(stack, [
     ParsingNode::{
-      kind: StackType::Bold,
+      kind: StackType::AsteriskBold,
       children: [N::Text("太字"), N::Strikethrough([N::Text("取り消し")])],
     },
   ])
@@ -259,18 +268,23 @@ test "内側の書式を閉じて外側の子に追加する" {
 test "スタックが空なら書式を開く" {
   let stack : Array[ParsingNode] = []
   let nodes : Array[Node] = []
-  push_or_close_by_type(stack, nodes, StackType::Bold)
-  assert_eq(stack, [ParsingNode::{ kind: StackType::Bold, children: [], }])
+  push_or_close_by_type(stack, nodes, StackType::AsteriskBold)
+  assert_eq(stack, [
+    ParsingNode::{ kind: StackType::AsteriskBold, children: [], },
+  ])
   assert_eq(nodes, [])
 }
 
 ///|
 test "スタック末尾と同じ書式なら閉じる" {
   let stack = [
-    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], },
+    ParsingNode::{
+      kind: StackType::AsteriskBold,
+      children: [N::Text("太字")],
+    },
   ]
   let nodes : Array[Node] = []
-  push_or_close_by_type(stack, nodes, StackType::Bold)
+  push_or_close_by_type(stack, nodes, StackType::AsteriskBold)
   assert_eq(stack, [])
   assert_eq(nodes, [N::Bold([N::Text("太字")])])
 }
@@ -278,12 +292,18 @@ test "スタック末尾と同じ書式なら閉じる" {
 ///|
 test "スタック末尾と異なる書式なら内側に開く" {
   let stack = [
-    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], },
+    ParsingNode::{
+      kind: StackType::AsteriskBold,
+      children: [N::Text("太字")],
+    },
   ]
   let nodes : Array[Node] = []
   push_or_close_by_type(stack, nodes, StackType::Strikethrough)
   assert_eq(stack, [
-    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], },
+    ParsingNode::{
+      kind: StackType::AsteriskBold,
+      children: [N::Text("太字")],
+    },
     ParsingNode::{ kind: StackType::Strikethrough, children: [], },
   ])
   assert_eq(nodes, [])
@@ -292,7 +312,10 @@ test "スタック末尾と異なる書式なら内側に開く" {
 ///|
 test "未閉鎖の書式を記号と子ノードとして最終結果へ戻す" {
   let stack = [
-    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], },
+    ParsingNode::{
+      kind: StackType::AsteriskBold,
+      children: [N::Text("太字")],
+    },
   ]
   let nodes : Array[Node] = []
   restore_unclosed_node(stack, nodes)
@@ -303,7 +326,10 @@ test "未閉鎖の書式を記号と子ノードとして最終結果へ戻す" 
 ///|
 test "未閉鎖の内側の書式を外側の子へ戻す" {
   let stack = [
-    ParsingNode::{ kind: StackType::Bold, children: [N::Text("太字")], },
+    ParsingNode::{
+      kind: StackType::AsteriskBold,
+      children: [N::Text("太字")],
+    },
     ParsingNode::{
       kind: StackType::Strikethrough,
       children: [N::Text("取り消し")],
@@ -313,7 +339,7 @@ test "未閉鎖の内側の書式を外側の子へ戻す" {
   restore_unclosed_node(stack, nodes)
   assert_eq(stack, [
     ParsingNode::{
-      kind: StackType::Bold,
+      kind: StackType::AsteriskBold,
       children: [N::Text("太字"), N::Text("~~"), N::Text("取り消し")],
     },
   ])
@@ -333,7 +359,7 @@ test "空のスタックを復元しても結果は変わらない" {
 test "未閉鎖ノードの子にあるコードを保持する" {
   let stack = [
     ParsingNode::{
-      kind: StackType::Bold,
+      kind: StackType::AsteriskBold,
       children: [N::Text("前 "), N::Code("コード")],
     },
   ]
@@ -369,5 +395,57 @@ test "複数の未閉鎖書式を元の順序で文字へ戻す" {
     N::Text("前 "),
     N::Text("~~"),
     N::Text("後"),
+  ])
+}
+
+///|
+test "アンダースコアの斜体を組み立てる" {
+  assert_eq(parse(tokenize("_斜体_")), [N::Italic([N::Text("斜体")])])
+}
+
+///|
+test "アンダースコアの太字を組み立てる" {
+  assert_eq(parse(tokenize("__太字__")), [N::Bold([N::Text("太字")])])
+}
+
+///|
+test "アンダースコアの斜体が未閉鎖の場合は記号と文字へ戻す" {
+  assert_eq(parse(tokenize("_斜体")), [N::Text("_"), N::Text("斜体")])
+}
+
+///|
+test "アンダースコアの太字が未閉鎖の場合は記号と文字へ戻す" {
+  assert_eq(parse(tokenize("__太字")), [N::Text("__"), N::Text("太字")])
+}
+
+///|
+test "アスタリスクで開いた斜体をアンダースコアでは閉じない" {
+  assert_eq(parse(tokenize("*斜体_")), [
+    N::Text("*"),
+    N::Text("斜体"),
+    N::Text("_"),
+  ])
+}
+
+///|
+test "アンダースコアで開いた斜体をアスタリスクでは閉じない" {
+  assert_eq(parse(tokenize("_斜体*")), [
+    N::Text("_"),
+    N::Text("斜体"),
+    N::Text("*"),
+  ])
+}
+
+///|
+test "太字も開始と異なる記号では閉じない" {
+  assert_eq(parse(tokenize("**太字__")), [
+    N::Text("**"),
+    N::Text("太字"),
+    N::Text("__"),
+  ])
+  assert_eq(parse(tokenize("__太字**")), [
+    N::Text("__"),
+    N::Text("太字"),
+    N::Text("**"),
   ])
 }

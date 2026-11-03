@@ -3,6 +3,8 @@ enum Token {
   Text(String)
   SingleAsterisk
   DoubleAsterisk
+  SingleUnderscore
+  DoubleUnderscore
   DoubleTilde
   Backtick
 } derive(Eq, Debug)
@@ -28,6 +30,8 @@ fn tokenize(input : String) -> Array[Token] {
       ('*', Some('*')) => Some((Token::DoubleAsterisk, 2))
       ('*', _) => Some((Token::SingleAsterisk, 1))
       ('~', Some('~')) => Some((Token::DoubleTilde, 2))
+      ('_', Some('_')) => Some((Token::DoubleUnderscore, 2))
+      ('_', _) => Some((Token::SingleUnderscore, 1))
       ('`', _) => Some((Token::Backtick, 1))
       _ => None
     }

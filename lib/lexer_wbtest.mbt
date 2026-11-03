@@ -55,6 +55,26 @@ test "二重アスタリスクとバッククォートの混在をトークン�
 }
 
 ///|
+test "単一アンダースコアを文字と区別してトークン化する" {
+  assert_eq(tokenize("_斜体_"), [
+    T::SingleUnderscore,
+    T::Text("斜体"),
+    T::SingleUnderscore,
+  ])
+  assert_eq(tokenize("a_b"), [T::Text("a"), T::SingleUnderscore, T::Text("b")])
+}
+
+///|
+test "二重アンダースコアを文字と区別してトークン化する" {
+  assert_eq(tokenize("__太字__"), [
+    T::DoubleUnderscore,
+    T::Text("太字"),
+    T::DoubleUnderscore,
+  ])
+  assert_eq(tokenize("a__b"), [T::Text("a"), T::DoubleUnderscore, T::Text("b")])
+}
+
+///|
 test "二重チルダを文字と区別してトークン化する" {
   assert_eq(tokenize("~~取り消し~~"), [
     T::DoubleTilde,

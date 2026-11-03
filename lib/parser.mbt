@@ -1,7 +1,9 @@
 ///|
 enum StackType {
-  Italic
-  Bold
+  AsteriskItalic
+  AsteriskBold
+  UnderscoreItalic
+  UnderscoreBold
   Strikethrough
 } derive(Eq, Debug)
 
@@ -30,9 +32,9 @@ pub extend ParsingNode with Debug::{to_repr}
 ///|
 fn ParsingNode::to_node(self : Self) -> Node {
   match self.kind {
-    Italic => Italic(self.children)
-    Bold => Bold(self.children)
-    Strikethrough => Strikethrough(self.children)
+    AsteriskItalic | UnderscoreItalic => Node::Italic(self.children)
+    AsteriskBold | UnderscoreBold => Node::Bold(self.children)
+    Strikethrough => Node::Strikethrough(self.children)
   }
 }
 
@@ -49,6 +51,8 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
         SingleAsterisk => code_tmp.write_string("*")
         DoubleAsterisk => code_tmp.write_string("**")
         DoubleTilde => code_tmp.write_string("~~")
+        SingleUnderscore => code_tmp.write_string("_")
+        DoubleUnderscore => code_tmp.write_string("__")
         Backtick => {
           push_node(stack, nodes, Node::Code(code_tmp.to_string()))
           code = None
@@ -58,8 +62,14 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
     }
     match token {
       Text(s) => push_node(stack, nodes, Node::Text(s))
-      SingleAsterisk => push_or_close_by_type(stack, nodes, StackType::Italic)
-      DoubleAsterisk => push_or_close_by_type(stack, nodes, StackType::Bold)
+      SingleAsterisk =>
+        push_or_close_by_type(stack, nodes, StackType::AsteriskItalic)
+      DoubleAsterisk =>
+        push_or_close_by_type(stack, nodes, StackType::AsteriskBold)
+      SingleUnderscore =>
+        push_or_close_by_type(stack, nodes, StackType::UnderscoreItalic)
+      DoubleUnderscore =>
+        push_or_close_by_type(stack, nodes, StackType::UnderscoreBold)
       DoubleTilde =>
         push_or_close_by_type(stack, nodes, StackType::Strikethrough)
       Backtick => code = Some(StringBuilder())
@@ -120,8 +130,10 @@ fn restore_unclosed_node(
       stack,
       nodes,
       match parsing_node.kind {
-        StackType::Italic => Node::Text("*")
-        StackType::Bold => Node::Text("**")
+        StackType::AsteriskItalic => Node::Text("*")
+        StackType::AsteriskBold => Node::Text("**")
+        StackType::UnderscoreItalic => Node::Text("_")
+        StackType::UnderscoreBold => Node::Text("__")
         StackType::Strikethrough => Node::Text("~~")
       },
     )
