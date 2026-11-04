@@ -48,6 +48,7 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
     if code is Some(code_tmp) {
       match token {
         Text(s) => code_tmp.write_string(s)
+        Escaped(c) => code_tmp.write_string("\\\{c}")
         SingleAsterisk => code_tmp.write_string("*")
         DoubleAsterisk => code_tmp.write_string("**")
         DoubleTilde => code_tmp.write_string("~~")
@@ -62,6 +63,7 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
     }
     match token {
       Text(s) => push_node(stack, nodes, Node::Text(s))
+      Escaped(c) => push_node(stack, nodes, Node::Text(c.to_string()))
       SingleAsterisk =>
         push_or_close_by_type(stack, nodes, StackType::AsteriskItalic)
       DoubleAsterisk =>

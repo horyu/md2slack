@@ -1,6 +1,7 @@
 ///|
 enum Token {
   Text(String)
+  Escaped(Char)
   SingleAsterisk
   DoubleAsterisk
   SingleUnderscore
@@ -27,6 +28,9 @@ fn tokenize(input : String) -> Array[Token] {
   let mut text_start = 0
   while pos < len {
     let matched_token = match (input[pos], input.get(pos + 1)) {
+      // 対象をASCII記号に限定しているため、Charへの変換は必ず成功する。
+      ('\\', Some(c)) if c == '*' || c == '_' || c == '~' || c == '\\' =>
+        Some((Token::Escaped(c.to_char().unwrap()), 2))
       ('*', Some('*')) => Some((Token::DoubleAsterisk, 2))
       ('*', _) => Some((Token::SingleAsterisk, 1))
       ('~', Some('~')) => Some((Token::DoubleTilde, 2))

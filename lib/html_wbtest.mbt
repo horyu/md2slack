@@ -74,3 +74,35 @@ test "Markdown文字列をトークンと構造を経由してHTMLへ変換す�
     "<code>__コード__</code>",
   )
 }
+
+///|
+test "バックスラッシュでエスケープされた記号をHTMLへ変換する" {
+  assert_eq(
+    parse(tokenize("\\*文字\\*")).map(Node::to_html).join(""),
+    "*文字*",
+  )
+  assert_eq(
+    parse(tokenize("\\_文字\\_")).map(Node::to_html).join(""),
+    "_文字_",
+  )
+  assert_eq(
+    parse(tokenize("\\~\\~文字\\~\\~")).map(Node::to_html).join(""),
+    "~~文字~~",
+  )
+  assert_eq(parse(tokenize("a\\*b")).map(Node::to_html).join(""), "a*b")
+  assert_eq(parse(tokenize("a\\_b")).map(Node::to_html).join(""), "a_b")
+  assert_eq(parse(tokenize("a\\~b")).map(Node::to_html).join(""), "a~b")
+  assert_eq(parse(tokenize("a\\\\b")).map(Node::to_html).join(""), "a\\b")
+}
+
+///|
+test "コード内のバックスラッシュを保持してHTMLへ変換する" {
+  assert_eq(
+    parse(tokenize("`\\*`")).map(Node::to_html).join(""),
+    "<code>\\*</code>",
+  )
+  assert_eq(
+    parse(tokenize("`\\\\`")).map(Node::to_html).join(""),
+    "<code>\\\\</code>",
+  )
+}

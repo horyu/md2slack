@@ -103,3 +103,25 @@ test "絵文字の直後の記号を正しい位置でトークン化する" {
     T::DoubleTilde,
   ])
 }
+
+///|
+test "バックスラッシュでエスケープされた記号をトークン化する" {
+  assert_eq(tokenize("\\*"), [T::Escaped('*')])
+  assert_eq(tokenize("a\\*b"), [T::Text("a"), T::Escaped('*'), T::Text("b")])
+  assert_eq(tokenize("\\_"), [T::Escaped('_')])
+  assert_eq(tokenize("a\\_b"), [T::Text("a"), T::Escaped('_'), T::Text("b")])
+  assert_eq(tokenize("\\~"), [T::Escaped('~')])
+  assert_eq(tokenize("a\\~b"), [T::Text("a"), T::Escaped('~'), T::Text("b")])
+  assert_eq(tokenize("\\\\"), [T::Escaped('\\')])
+  assert_eq(tokenize("a\\\\b"), [T::Text("a"), T::Escaped('\\'), T::Text("b")])
+}
+
+///|
+test "エスケープ対象外の文字の前ではバックスラッシュも保持する" {
+  assert_eq(tokenize("\\a"), [T::Text("\\a")])
+}
+
+///|
+test "末尾のバックスラッシュは文字としてトークン化する" {
+  assert_eq(tokenize("\\"), [T::Text("\\")])
+}

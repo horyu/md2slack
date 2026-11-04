@@ -449,3 +449,13 @@ test "太字も開始と異なる記号では閉じない" {
     N::Text("**"),
   ])
 }
+
+///|
+test "コード外ではエスケープのバックスラッシュを取り除く" {
+  assert_eq(parse([T::Escaped('_')]), [N::Text("_")])
+}
+
+///|
+test "コード内ではエスケープのバックスラッシュを保持する" {
+  assert_eq(parse([T::Backtick, T::Escaped('_'), T::Backtick]), [N::Code("\\_")])
+}
