@@ -73,9 +73,9 @@ dependencies:
 - repo_url: moonbitlang/skills
   name: moonbit-skills
   host: github.com
-  resolved_commit: 8b9f1bad14bc62560dbe3537855379e561a4e066
-  version: 8b9f1ba
-  package_type: skill_bundle
+  resolved_commit: 321f9b7effe4667a478032895ff7f4a5755f56f6
+  version: 321f9b7
+  package_type: marketplace_plugin
   deployed_files:
   - .agents/skills/moonbit-orientation
   - .agents/skills/moonbit-orientation/SKILL.md
@@ -90,18 +90,18 @@ dependencies:
   - .agents/skills/moonbit-orientation/references/source-map.md
   - .agents/skills/moonbit-orientation/references/toolchain-map.md
   deployed_file_hashes:
-    .agents/skills/moonbit-orientation/SKILL.md: sha256:5ed25d42e486b677511b33d9eef86e15e73be8c0fdc5c7eac57a5e699896124f
+    .agents/skills/moonbit-orientation/SKILL.md: sha256:7bfadabc647e95c0f21d4a9556811bc1b645a2f85ba5c46a0ee70495dab257ca
     .agents/skills/moonbit-orientation/agents/openai.yaml: sha256:e42c9cb6bfc4bc1ff80468390fdb7967e9f9775a7dd70e822b74d9760619cbc4
     .agents/skills/moonbit-orientation/references/answer-shapes.md: sha256:cd8b72364251d11c83ecef7263d01bd476d9945565ff16ae79322359bf5ff3ae
-    .agents/skills/moonbit-orientation/references/capabilities-faq.md: sha256:8f5bdb29a4725a9f2fe7aab0b0e8f77a5dcafb0a6ae40234c1441f1ee9dbb910
-    .agents/skills/moonbit-orientation/references/diagnostics-playbook.md: sha256:265898a388ce9139dbd11d6bd2a1b323385a0272006ad2de4188e8aeed33c1b0
-    .agents/skills/moonbit-orientation/references/idioms.md: sha256:332a24c4ce8817bd4475ecff23c57e9c2e11b71dcd2a9d27ee6aba4de80bfcaa
-    .agents/skills/moonbit-orientation/references/lookup-recipes.md: sha256:a556537456be58b60157909f42d8aea6f17556d52ce512c9d2fbbd36b20e2535
-    .agents/skills/moonbit-orientation/references/mental-models.md: sha256:ffeed2efb306266908359cc7a1fd1334666eddb82dbe039b0e1e19fe06d9806c
-    .agents/skills/moonbit-orientation/references/question-routing.md: sha256:4486fe6739cfe09600cf74bb66f463b904e54d511c07aeb5985b25b8dd5170e7
+    .agents/skills/moonbit-orientation/references/capabilities-faq.md: sha256:44915c408f865c4bf58d021738d776c1943b5fe729c00a678cbbc88732b28ecb
+    .agents/skills/moonbit-orientation/references/diagnostics-playbook.md: sha256:dfddd29c9bc2c5fea88cf9c9f643a138c1c4706bfc08ed0412203e5831b7264e
+    .agents/skills/moonbit-orientation/references/idioms.md: sha256:85138ecfd7ad406673831b8f7522293565334147e4b8db92c9922c26d9a7542a
+    .agents/skills/moonbit-orientation/references/lookup-recipes.md: sha256:863004fd55de4558ad16c93bf443083d12e23e736f95bb5801426f02e0b33a77
+    .agents/skills/moonbit-orientation/references/mental-models.md: sha256:eeffd2b260e2bca32c95645e539a8de7ca8202b95774fa44d8fb9cd6f5e5a079
+    .agents/skills/moonbit-orientation/references/question-routing.md: sha256:d57ef59af807b3f16b7d5b9277d27358e6dcd4b869cc95ebfd499165f8f4d8ca
     .agents/skills/moonbit-orientation/references/source-map.md: sha256:dd469d3eac088d18968a0e3f4dd5f267273f08b462d4dea7369b785c4e6445ec
-    .agents/skills/moonbit-orientation/references/toolchain-map.md: sha256:db3fbe3b8821089a788aaf119ff3856459d7f9c8a88b87b8c2f3d3868748d810
-  content_hash: sha256:2cc2c14f0561075081e629dcedc9540620a79b2afa3df1f03851110bf663e98c
+    .agents/skills/moonbit-orientation/references/toolchain-map.md: sha256:f21c6108efd13f8d8135dbbf65cdbac0b2c0df5215918909a143018cbcffeea3
+  content_hash: sha256:539c50d2960c14edf16a50b47f2fb188f83554ea72468281c44f7f89e6ff0f00
   skill_subset:
   - moonbit-orientation
 deployments:
@@ -329,7 +329,7 @@ deployments:
   owners:
   - moonbitlang/skills
   active_owner: moonbitlang/skills
-  content_hash: sha256:5ed25d42e486b677511b33d9eef86e15e73be8c0fdc5c7eac57a5e699896124f
+  content_hash: sha256:7bfadabc647e95c0f21d4a9556811bc1b645a2f85ba5c46a0ee70495dab257ca
 - kind: project-relative
   target: codex
   value: .agents/skills/moonbit-orientation/agents/openai.yaml
@@ -356,7 +356,7 @@ deployments:
   owners:
   - moonbitlang/skills
   active_owner: moonbitlang/skills
-  content_hash: sha256:8f5bdb29a4725a9f2fe7aab0b0e8f77a5dcafb0a6ae40234c1441f1ee9dbb910
+  content_hash: sha256:44915c408f865c4bf58d021738d776c1943b5fe729c00a678cbbc88732b28ecb
 - kind: project-relative
   target: codex
   value: .agents/skills/moonbit-orientation/references/diagnostics-playbook.md
@@ -365,7 +365,7 @@ deployments:
   owners:
   - moonbitlang/skills
   active_owner: moonbitlang/skills
-  content_hash: sha256:265898a388ce9139dbd11d6bd2a1b323385a0272006ad2de4188e8aeed33c1b0
+  content_hash: sha256:dfddd29c9bc2c5fea88cf9c9f643a138c1c4706bfc08ed0412203e5831b7264e
 - kind: project-relative
   target: codex
   value: .agents/skills/moonbit-orientation/references/idioms.md
@@ -374,7 +374,7 @@ deployments:
   owners:
   - moonbitlang/skills
   active_owner: moonbitlang/skills
-  content_hash: sha256:332a24c4ce8817bd4475ecff23c57e9c2e11b71dcd2a9d27ee6aba4de80bfcaa
+  content_hash: sha256:85138ecfd7ad406673831b8f7522293565334147e4b8db92c9922c26d9a7542a
 - kind: project-relative
   target: codex
   value: .agents/skills/moonbit-orientation/references/lookup-recipes.md
@@ -383,7 +383,7 @@ deployments:
   owners:
   - moonbitlang/skills
   active_owner: moonbitlang/skills
-  content_hash: sha256:a556537456be58b60157909f42d8aea6f17556d52ce512c9d2fbbd36b20e2535
+  content_hash: sha256:863004fd55de4558ad16c93bf443083d12e23e736f95bb5801426f02e0b33a77
 - kind: project-relative
   target: codex
   value: .agents/skills/moonbit-orientation/references/mental-models.md
@@ -392,7 +392,7 @@ deployments:
   owners:
   - moonbitlang/skills
   active_owner: moonbitlang/skills
-  content_hash: sha256:ffeed2efb306266908359cc7a1fd1334666eddb82dbe039b0e1e19fe06d9806c
+  content_hash: sha256:eeffd2b260e2bca32c95645e539a8de7ca8202b95774fa44d8fb9cd6f5e5a079
 - kind: project-relative
   target: codex
   value: .agents/skills/moonbit-orientation/references/question-routing.md
@@ -401,7 +401,7 @@ deployments:
   owners:
   - moonbitlang/skills
   active_owner: moonbitlang/skills
-  content_hash: sha256:4486fe6739cfe09600cf74bb66f463b904e54d511c07aeb5985b25b8dd5170e7
+  content_hash: sha256:d57ef59af807b3f16b7d5b9277d27358e6dcd4b869cc95ebfd499165f8f4d8ca
 - kind: project-relative
   target: codex
   value: .agents/skills/moonbit-orientation/references/source-map.md
@@ -419,7 +419,7 @@ deployments:
   owners:
   - moonbitlang/skills
   active_owner: moonbitlang/skills
-  content_hash: sha256:db3fbe3b8821089a788aaf119ff3856459d7f9c8a88b87b8c2f3d3868748d810
+  content_hash: sha256:f21c6108efd13f8d8135dbbf65cdbac0b2c0df5215918909a143018cbcffeea3
 - kind: project-relative
   target: codex
   value: .codex/agents/apm-expert.toml
