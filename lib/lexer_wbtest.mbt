@@ -125,3 +125,15 @@ test "エスケープ対象外の文字の前ではバックスラッシュも�
 test "末尾のバックスラッシュは文字としてトークン化する" {
   assert_eq(tokenize("\\"), [T::Text("\\")])
 }
+
+///|
+test "リンクをトークン化する" {
+  assert_eq(tokenize("[表示名](URL)"), [
+    T::LeftBracket,
+    T::Text("表示名"),
+    T::RightBracket,
+    T::LeftParen,
+    T::Text("URL"),
+    T::RightParen,
+  ])
+}

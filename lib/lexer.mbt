@@ -1,24 +1,4 @@
 ///|
-enum Token {
-  Text(String)
-  Escaped(Char)
-  SingleAsterisk
-  DoubleAsterisk
-  SingleUnderscore
-  DoubleUnderscore
-  DoubleTilde
-  Backtick
-} derive(Eq, Debug)
-
-///|
-#deprecated
-pub extend Token with Eq::{equal, not_equal}
-
-///|
-#deprecated
-pub extend Token with Debug::{to_repr}
-
-///|
 // 既存の変換処理に接続するまで、未使用関数の警告を抑制する。
 #warnings("-unused_value")
 fn tokenize(input : String) -> Array[Token] {
@@ -37,6 +17,10 @@ fn tokenize(input : String) -> Array[Token] {
       ('_', Some('_')) => Some((Token::DoubleUnderscore, 2))
       ('_', _) => Some((Token::SingleUnderscore, 1))
       ('`', _) => Some((Token::Backtick, 1))
+      ('[', _) => Some((Token::LeftBracket, 1))
+      (']', _) => Some((Token::RightBracket, 1))
+      ('(', _) => Some((Token::LeftParen, 1))
+      (')', _) => Some((Token::RightParen, 1))
       _ => None
     }
     if matched_token is Some((token, advance)) {

@@ -459,3 +459,89 @@ test "コード外ではエスケープのバックスラッシュを取り除�
 test "コード内ではエスケープのバックスラッシュを保持する" {
   assert_eq(parse([T::Backtick, T::Escaped('_'), T::Backtick]), [N::Code("\\_")])
 }
+
+///|
+test "リンクのラベルとURLを正しく解析する" {
+  assert_eq(parse(tokenize("[ラベル](url)")), [
+    N::Link(label="ラベル", url="url"),
+  ])
+}
+
+///|
+test "リンクのラベルが未閉鎖の場合は文字へ戻す" {
+  assert_eq(parse(tokenize("[ラベル")), [N::Text("[ラベル")])
+}
+
+///|
+test "リンクのラベルが閉鎖されURLが未開の場合は文字へ戻す" {
+  assert_eq(parse(tokenize("[ラベル]")), [N::Text("[ラベル]")])
+}
+
+///|
+test "リンクのラベルが閉鎖されURLが未開で文字が続く場合は文字へ戻す" {
+  assert_eq(parse(tokenize("[ラベル]だけ")), [
+    N::Text("[ラベル]"),
+    N::Text("だけ"),
+  ])
+}
+
+///|
+test "リンクのラベルが閉じていて後に斜体が続く場合" {
+  assert_eq(parse(tokenize("[ラベル]*斜体*")), [
+    N::Text("[ラベル]"),
+    N::Italic([N::Text("斜体")]),
+  ])
+}
+
+///|
+test "リンクのURLが未閉鎖の場合は文字へ戻す" {
+  assert_eq(parse(tokenize("[ラベル](url")), [N::Text("[ラベル](url")])
+}
+
+///|
+test "リンクではない括弧はテキストとして扱う" {
+  assert_eq(parse(tokenize("普通の(文章)")), [
+    N::Text("普通の"),
+    N::Text("("),
+    N::Text("文章"),
+    N::Text(")"),
+  ])
+  assert_eq(parse(tokenize("a]b")), [N::Text("a"), N::Text("]"), N::Text("b")])
+  assert_eq(parse(tokenize("a(b")), [N::Text("a"), N::Text("("), N::Text("b")])
+  assert_eq(parse(tokenize("a)b")), [N::Text("a"), N::Text(")"), N::Text("b")])
+}
+
+///|
+test "リンクのラベルに括弧が含まれる場合" {
+  assert_eq(parse(tokenize("[公式(日本語)](url)")), [
+    N::Link(label="公式(日本語)", url="url"),
+  ])
+}
+
+///|
+test "リンクのラベルにエスケープが含まれる場合" {
+  assert_eq(parse(tokenize("[名\\_前](url)")), [
+    N::Link(label="名_前", url="url"),
+  ])
+}
+
+///|
+test "リンクのURLにアンダースコアが含まれる場合" {
+  assert_eq(parse(tokenize("[公式](https://horyu.github.io/my_page)")), [
+    N::Link(label="公式", url="https://horyu.github.io/my_page"),
+  ])
+}
+
+///|
+test "リンクのURLに複数の記号が含まれる場合" {
+  assert_eq(parse(tokenize("[公式](https://horyu.github.io/a__b*~)")), [
+    N::Link(label="公式", url="https://horyu.github.io/a__b*~"),
+  ])
+}
+
+///|
+test "リンクのラベルに複数の記号が含まれる場合" {
+  assert_eq(parse(tokenize("[名*前*_そのまま](url)")), [
+    N::Link(label="名*前*_そのまま", url="url"),
+  ])
+}

@@ -39,27 +39,61 @@ fn ParsingNode::to_node(self : Self) -> Node {
 }
 
 ///|
+priv enum LinkState {
+  InLabel(label~ : StringBuilder)
+  BeforeLeftParen(label~ : String)
+  InUrl(label~ : String, url~ : StringBuilder)
+}
+
+///|
 #warnings("-unused_value")
 fn parse(tokens : Array[Token]) -> Array[Node] {
   let nodes : Array[Node] = []
   let stack : Array[ParsingNode] = []
   let mut code : StringBuilder? = None
+  let mut link_state : LinkState? = None
   for token in tokens {
     if code is Some(code_tmp) {
-      match token {
-        Text(s) => code_tmp.write_string(s)
-        Escaped(c) => code_tmp.write_string("\\\{c}")
-        SingleAsterisk => code_tmp.write_string("*")
-        DoubleAsterisk => code_tmp.write_string("**")
-        DoubleTilde => code_tmp.write_string("~~")
-        SingleUnderscore => code_tmp.write_string("_")
-        DoubleUnderscore => code_tmp.write_string("__")
-        Backtick => {
-          push_node(stack, nodes, Node::Code(code_tmp.to_string()))
-          code = None
-        }
+      if token == Backtick {
+        push_node(stack, nodes, Node::Code(code_tmp.to_string()))
+        code = None
+      } else {
+        code_tmp.write_string(token.to_string())
       }
       continue
+    }
+    if link_state is Some(ls) {
+      match ls {
+        InLabel(label~) => {
+          match token {
+            RightBracket =>
+              link_state = Some(
+                LinkState::BeforeLeftParen(label=label.to_string()),
+              )
+            Escaped(c) => label.write_string(c.to_string())
+            _ => label.write_string(token.to_string())
+          }
+          continue
+        }
+        BeforeLeftParen(label~) =>
+          if token == LeftParen {
+            link_state = Some(LinkState::InUrl(label~, url=StringBuilder()))
+            continue
+          } else {
+            push_node(stack, nodes, Node::Text("[" + label + "]"))
+            link_state = None
+            // 今回のトークンは、リンク外の通常処理へ渡す。
+          }
+        InUrl(label~, url~) => {
+          if token == RightParen {
+            push_node(stack, nodes, Node::Link(label~, url=url.to_string()))
+            link_state = None
+          } else {
+            url.write_string(token.to_string())
+          }
+          continue
+        }
+      }
     }
     match token {
       Text(s) => push_node(stack, nodes, Node::Text(s))
@@ -75,12 +109,31 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
       DoubleTilde =>
         push_or_close_by_type(stack, nodes, StackType::Strikethrough)
       Backtick => code = Some(StringBuilder())
+      LeftBracket =>
+        link_state = Some(LinkState::InLabel(label=StringBuilder()))
+      RightBracket => push_node(stack, nodes, Node::Text("]"))
+      LeftParen => push_node(stack, nodes, Node::Text("("))
+      RightParen => push_node(stack, nodes, Node::Text(")"))
     }
   }
-  // 未閉鎖のコードを先に戻し、その後で書式を内側から順に戻す。
+  // コードとリンク候補を文字へ戻してから、外側の書式を内側から順に戻す。
   if code is Some(code_tmp) {
     push_node(stack, nodes, Node::Text("`"))
     push_node(stack, nodes, Node::Text(code_tmp.to_string()))
+  }
+  if link_state is Some(ls) {
+    match ls {
+      LinkState::InLabel(label~) =>
+        push_node(stack, nodes, Node::Text("[" + label.to_string()))
+      LinkState::BeforeLeftParen(label~) =>
+        push_node(stack, nodes, Node::Text("[" + label + "]"))
+      LinkState::InUrl(label~, url~) =>
+        push_node(
+          stack,
+          nodes,
+          Node::Text("[" + label + "](" + url.to_string()),
+        )
+    }
   }
   while !stack.is_empty() {
     restore_unclosed_node(stack, nodes)

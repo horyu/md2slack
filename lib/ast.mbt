@@ -5,6 +5,7 @@ enum Node {
   Strikethrough(Array[Node])
   Italic(Array[Node])
   Code(String)
+  Link(label~ : String, url~ : String)
 } derive(Eq, Debug)
 
 ///|

@@ -48,6 +48,28 @@ test "斜体をHTMLへ変換する" {
 }
 
 ///|
+test "リンクをHTMLへ変換する" {
+  assert_eq(
+    Node::Link(label="リンク", url="https://github.com/horyu/md2slack").to_html(),
+    "<a href=\"https://github.com/horyu/md2slack\">リンク</a>",
+  )
+  assert_eq(
+    Node::Link(label="<公式> & 案内", url="https://example.com/?a=1&b=2").to_html(),
+    "<a href=\"https://example.com/?a=1&amp;b=2\">&lt;公式&gt; &amp; 案内</a>",
+  )
+}
+
+///|
+test "リンクの文字列を解析してHTMLへ変換する" {
+  assert_eq(
+    parse(tokenize("[公式](https://example.com/)"))
+    .map(Node::to_html)
+    .join(""),
+    "<a href=\"https://example.com/\">公式</a>",
+  )
+}
+
+///|
 test "Markdown文字列をトークンと構造を経由してHTMLへ変換する" {
   assert_eq(
     parse(tokenize("前 **太字** 後")).map(Node::to_html).join(""),
