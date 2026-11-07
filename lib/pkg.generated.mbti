@@ -1,0 +1,48 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "local/md2slack/lib"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn markdown_to_slack_html(String) -> String
+
+// Errors
+
+// Types and methods
+type Node derive(Eq, @debug.Debug)
+#deprecated
+pub fn Node::equal(Self, Self) -> Bool
+#deprecated
+pub fn Node::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn Node::to_repr(Self) -> @debug.Repr
+
+type ParsingNode derive(Eq, @debug.Debug)
+#deprecated
+pub fn ParsingNode::equal(Self, Self) -> Bool
+#deprecated
+pub fn ParsingNode::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn ParsingNode::to_repr(Self) -> @debug.Repr
+
+type StackType derive(Eq, @debug.Debug)
+#deprecated
+pub fn StackType::equal(Self, Self) -> Bool
+#deprecated
+pub fn StackType::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn StackType::to_repr(Self) -> @debug.Repr
+
+type Token derive(Eq, @debug.Debug)
+#deprecated
+pub fn Token::equal(Self, Self) -> Bool
+#deprecated
+pub fn Token::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn Token::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits
