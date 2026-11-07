@@ -545,3 +545,20 @@ test "リンクのラベルに複数の記号が含まれる場合" {
     N::Link(label="名*前*_そのまま", url="url"),
   ])
 }
+
+///|
+test "未完成のリンクを文字列へ戻す" {
+  let label = StringBuilder()
+  label.write_string("ラベル")
+  assert_eq(LinkState::InLabel(label~).to_string(), "[ラベル")
+  assert_eq(
+    LinkState::BeforeLeftParen(label="ラベル").to_string(),
+    "[ラベル]",
+  )
+  let url = StringBuilder()
+  url.write_string("url")
+  assert_eq(
+    LinkState::InUrl(label="ラベル", url~).to_string(),
+    "[ラベル](url",
+  )
+}

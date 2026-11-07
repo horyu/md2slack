@@ -46,6 +46,15 @@ priv enum LinkState {
 }
 
 ///|
+fn LinkState::to_string(self : Self) -> String {
+  match self {
+    LinkState::InLabel(label~) => "[" + label.to_string()
+    LinkState::BeforeLeftParen(label~) => "[" + label + "]"
+    LinkState::InUrl(label~, url~) => "[" + label + "](" + url.to_string()
+  }
+}
+
+///|
 #warnings("-unused_value")
 fn parse(tokens : Array[Token]) -> Array[Node] {
   let nodes : Array[Node] = []
@@ -80,7 +89,7 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
             link_state = Some(LinkState::InUrl(label~, url=StringBuilder()))
             continue
           } else {
-            push_node(stack, nodes, Node::Text("[" + label + "]"))
+            push_node(stack, nodes, Node::Text(ls.to_string()))
             link_state = None
             // 今回のトークンは、リンク外の通常処理へ渡す。
           }
@@ -122,18 +131,7 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
     push_node(stack, nodes, Node::Text(code_tmp.to_string()))
   }
   if link_state is Some(ls) {
-    match ls {
-      LinkState::InLabel(label~) =>
-        push_node(stack, nodes, Node::Text("[" + label.to_string()))
-      LinkState::BeforeLeftParen(label~) =>
-        push_node(stack, nodes, Node::Text("[" + label + "]"))
-      LinkState::InUrl(label~, url~) =>
-        push_node(
-          stack,
-          nodes,
-          Node::Text("[" + label + "](" + url.to_string()),
-        )
-    }
+    push_node(stack, nodes, Node::Text(ls.to_string()))
   }
   while !stack.is_empty() {
     restore_unclosed_node(stack, nodes)
