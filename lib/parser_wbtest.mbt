@@ -318,7 +318,7 @@ test "未閉鎖の書式を記号と子ノードとして最終結果へ戻す" 
     },
   ]
   let nodes : Array[Node] = []
-  restore_unclosed_node(stack, nodes)
+  restore_unclosed_nodes(stack, nodes)
   assert_eq(stack, [])
   assert_eq(nodes, [N::Text("**"), N::Text("太字")])
 }
@@ -336,21 +336,21 @@ test "未閉鎖の内側の書式を外側の子へ戻す" {
     },
   ]
   let nodes : Array[Node] = []
-  restore_unclosed_node(stack, nodes)
-  assert_eq(stack, [
-    ParsingNode::{
-      kind: StackType::AsteriskBold,
-      children: [N::Text("太字"), N::Text("~~"), N::Text("取り消し")],
-    },
+  restore_unclosed_nodes(stack, nodes)
+  assert_eq(stack, [])
+  assert_eq(nodes, [
+    N::Text("**"),
+    N::Text("太字"),
+    N::Text("~~"),
+    N::Text("取り消し"),
   ])
-  assert_eq(nodes, [])
 }
 
 ///|
 test "空のスタックを復元しても結果は変わらない" {
   let stack : Array[ParsingNode] = []
   let nodes : Array[Node] = []
-  restore_unclosed_node(stack, nodes)
+  restore_unclosed_nodes(stack, nodes)
   assert_eq(stack, [])
   assert_eq(nodes, [])
 }
@@ -364,7 +364,7 @@ test "未閉鎖ノードの子にあるコードを保持する" {
     },
   ]
   let nodes : Array[Node] = []
-  restore_unclosed_node(stack, nodes)
+  restore_unclosed_nodes(stack, nodes)
   assert_eq(stack, [])
   assert_eq(nodes, [N::Text("**"), N::Text("前 "), N::Code("コード")])
 }

@@ -133,9 +133,7 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
   if link_state is Some(ls) {
     push_node(stack, nodes, Node::Text(ls.to_string()))
   }
-  while !stack.is_empty() {
-    restore_unclosed_node(stack, nodes)
-  }
+  restore_unclosed_nodes(stack, nodes)
   nodes
 }
 
@@ -174,11 +172,11 @@ fn close_node(stack : Array[ParsingNode], nodes : Array[Node]) -> Unit {
 }
 
 ///|
-fn restore_unclosed_node(
+fn restore_unclosed_nodes(
   stack : Array[ParsingNode],
   nodes : Array[Node],
 ) -> Unit {
-  if stack.pop() is Some(parsing_node) {
+  while stack.pop() is Some(parsing_node) {
     push_node(
       stack,
       nodes,
