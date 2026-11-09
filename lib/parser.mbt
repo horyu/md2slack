@@ -1,32 +1,30 @@
 ///|
+#derive(Eq, Debug)
 enum StackType {
   AsteriskItalic
   AsteriskBold
   UnderscoreItalic
   UnderscoreBold
   Strikethrough
-} derive(Eq, Debug)
+}
 
 ///|
-#deprecated
 pub extend StackType with Eq::{equal, not_equal}
 
 ///|
-#deprecated
 pub extend StackType with Debug::{to_repr}
 
 ///|
+#derive(Eq, Debug)
 struct ParsingNode {
   kind : StackType
   children : Array[Node]
-} derive(Eq, Debug)
+}
 
 ///|
-#deprecated
 pub extend ParsingNode with Eq::{equal, not_equal}
 
 ///|
-#deprecated
 pub extend ParsingNode with Debug::{to_repr}
 
 ///|

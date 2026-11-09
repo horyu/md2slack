@@ -1,4 +1,5 @@
 ///|
+#derive(Eq, Debug)
 enum Token {
   Text(String)
   Escaped(Char)
@@ -12,14 +13,12 @@ enum Token {
   RightBracket
   LeftParen
   RightParen
-} derive(Eq, Debug)
+}
 
 ///|
-#deprecated
 pub extend Token with Eq::{equal, not_equal}
 
 ///|
-#deprecated
 pub extend Token with Debug::{to_repr}
 
 ///|
