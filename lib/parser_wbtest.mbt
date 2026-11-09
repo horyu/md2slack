@@ -562,3 +562,22 @@ test "未完成のリンクを文字列へ戻す" {
     "[ラベル](url",
   )
 }
+
+///|
+test "エスケープされたバッククォートのトークンをコード内外で区別する" {
+  assert_eq(parse([T::Escaped('`')]), [N::Text("`")])
+  assert_eq(
+    parse([
+      T::Backtick,
+      T::Text("内容"),
+      T::Escaped('`'),
+    ]),
+    [N::Code("内容\\")],
+  )
+}
+
+///|
+test "文字列中のエスケープされたバッククォートをコード内外で区別する" {
+  assert_eq(parse(tokenize("\\`")), [N::Text("`")])
+  assert_eq(parse(tokenize("`内容\\`")), [N::Code("内容\\")])
+}

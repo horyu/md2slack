@@ -9,7 +9,7 @@ fn tokenize(input : String) -> Array[Token] {
   while pos < len {
     let matched_token = match (input[pos], input.get(pos + 1)) {
       // 対象をASCII記号に限定しているため、Charへの変換は必ず成功する。
-      ('\\', Some('*' | '_' | '~' | '\\' as c)) =>
+      ('\\', Some('*' | '_' | '~' | '\\' | '`' as c)) =>
         Some((Token::Escaped(c.to_char().unwrap()), 2))
       ('*', Some('*')) => Some((Token::DoubleAsterisk, 2))
       ('*', _) => Some((Token::SingleAsterisk, 1))

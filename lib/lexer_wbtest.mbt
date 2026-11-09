@@ -114,6 +114,8 @@ test "バックスラッシュでエスケープされた記号をトークン�
   assert_eq(tokenize("a\\~b"), [T::Text("a"), T::Escaped('~'), T::Text("b")])
   assert_eq(tokenize("\\\\"), [T::Escaped('\\')])
   assert_eq(tokenize("a\\\\b"), [T::Text("a"), T::Escaped('\\'), T::Text("b")])
+  assert_eq(tokenize("\\`"), [T::Escaped('`')])
+  assert_eq(tokenize("a\\`b"), [T::Text("a"), T::Escaped('`'), T::Text("b")])
 }
 
 ///|

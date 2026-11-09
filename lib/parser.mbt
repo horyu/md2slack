@@ -63,11 +63,18 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
   let mut link_state : LinkState? = None
   for token in tokens {
     if code is Some(code_tmp) {
-      if token == Backtick {
-        push_node(stack, nodes, Node::Code(code_tmp.to_string()))
-        code = None
-      } else {
-        code_tmp.write_string(token.to_string())
+      match token {
+        Backtick => {
+          push_node(stack, nodes, Node::Code(code_tmp.to_string()))
+          code = None
+        }
+        Escaped('`') => {
+          // コード内ではエスケープを解釈せず、バックスラッシュを残して閉じる。
+          code_tmp.write_char('\\')
+          push_node(stack, nodes, Node::Code(code_tmp.to_string()))
+          code = None
+        }
+        _ => code_tmp.write_string(token.to_string())
       }
       continue
     }
