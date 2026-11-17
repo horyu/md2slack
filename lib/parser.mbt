@@ -57,22 +57,20 @@ fn LinkState::to_string(self : Self) -> String {
 fn parse(tokens : Array[Token]) -> Array[Node] {
   let nodes : Array[Node] = []
   let stack : Array[ParsingNode] = []
-  let mut code : StringBuilder? = None
+  let mut code_state : (StringBuilder, Int32)? = None
   let mut link_state : LinkState? = None
+  let mut pending_backslash : Bool = false
   for token in tokens {
-    if code is Some(code_tmp) {
-      match token {
-        Backtick => {
+    if code_state is Some((code_tmp, backtick_count)) {
+      if token is Backtick(count) {
+        if count == backtick_count {
           push_node(stack, nodes, Node::Code(code_tmp.to_string()))
-          code = None
+          code_state = None
+        } else {
+          code_tmp.write_string("`".repeat(count))
         }
-        Escaped('`') => {
-          // コード内ではエスケープを解釈せず、バックスラッシュを残して閉じる。
-          code_tmp.write_char('\\')
-          push_node(stack, nodes, Node::Code(code_tmp.to_string()))
-          code = None
-        }
-        _ => code_tmp.write_string(token.to_string())
+      } else {
+        code_tmp.write_string(token.to_string())
       }
       continue
     }
@@ -85,6 +83,8 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
                 LinkState::BeforeLeftParen(label=label.to_string()),
               )
             Escaped(c) => label.write_string(c.to_string())
+            // Backslashはバッククォートの直前にだけ生成される。
+            Backslash => ()
             _ => label.write_string(token.to_string())
           }
           continue
@@ -122,7 +122,17 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
         push_or_close_by_type(stack, nodes, StackType::UnderscoreBold)
       DoubleTilde =>
         push_or_close_by_type(stack, nodes, StackType::Strikethrough)
-      Backtick => code = Some(StringBuilder())
+      Backslash => pending_backslash = true
+      Backtick(count) =>
+        if pending_backslash {
+          push_node(stack, nodes, Node::Text("`"))
+          pending_backslash = false
+          if 1 < count {
+            code_state = Some((StringBuilder(), count - 1))
+          }
+        } else {
+          code_state = Some((StringBuilder(), count))
+        }
       LeftBracket =>
         link_state = Some(LinkState::InLabel(label=StringBuilder()))
       RightBracket => push_node(stack, nodes, Node::Text("]"))
@@ -131,9 +141,9 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
     }
   }
   // コードとリンク候補を文字へ戻してから、外側の書式を内側から順に戻す。
-  if code is Some(code_tmp) {
-    push_node(stack, nodes, Node::Text("`"))
-    push_node(stack, nodes, Node::Text(code_tmp.to_string()))
+  if code_state is Some((code, backtick_count)) {
+    push_node(stack, nodes, Node::Text("`".repeat(backtick_count)))
+    push_node(stack, nodes, Node::Text(code.to_string()))
   }
   if link_state is Some(ls) {
     push_node(stack, nodes, Node::Text(ls.to_string()))

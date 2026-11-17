@@ -8,7 +8,8 @@ enum Token {
   SingleUnderscore
   DoubleUnderscore
   DoubleTilde
-  Backtick
+  Backslash
+  Backtick(Int32)
   LeftBracket
   RightBracket
   LeftParen
@@ -32,7 +33,8 @@ fn Token::to_string(self : Self) -> String {
     Token::SingleUnderscore => "_"
     Token::DoubleUnderscore => "__"
     Token::DoubleTilde => "~~"
-    Token::Backtick => "`"
+    Token::Backslash => "\\"
+    Token::Backtick(n) => "`".repeat(n)
     Token::LeftBracket => "["
     Token::RightBracket => "]"
     Token::LeftParen => "("

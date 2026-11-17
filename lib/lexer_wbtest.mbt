@@ -35,9 +35,9 @@ test "単一アスタリスクを文字と区別してトークン化する" {
 ///|
 test "バッククォートを文字と区別してトークン化する" {
   assert_eq(tokenize("`コード`"), [
-    T::Backtick,
+    T::Backtick(1),
     T::Text("コード"),
-    T::Backtick,
+    T::Backtick(1),
   ])
 }
 
@@ -46,9 +46,9 @@ test "二重アスタリスクとバッククォートの混在をトークン�
   assert_eq(tokenize("**太字 `コード` 続き**"), [
     T::DoubleAsterisk,
     T::Text("太字 "),
-    T::Backtick,
+    T::Backtick(1),
     T::Text("コード"),
-    T::Backtick,
+    T::Backtick(1),
     T::Text(" 続き"),
     T::DoubleAsterisk,
   ])
@@ -114,8 +114,13 @@ test "バックスラッシュでエスケープされた記号をトークン�
   assert_eq(tokenize("a\\~b"), [T::Text("a"), T::Escaped('~'), T::Text("b")])
   assert_eq(tokenize("\\\\"), [T::Escaped('\\')])
   assert_eq(tokenize("a\\\\b"), [T::Text("a"), T::Escaped('\\'), T::Text("b")])
-  assert_eq(tokenize("\\`"), [T::Escaped('`')])
-  assert_eq(tokenize("a\\`b"), [T::Text("a"), T::Escaped('`'), T::Text("b")])
+  assert_eq(tokenize("\\`"), [T::Backslash, T::Backtick(1)])
+  assert_eq(tokenize("a\\`b"), [
+    T::Text("a"),
+    T::Backslash,
+    T::Backtick(1),
+    T::Text("b"),
+  ])
 }
 
 ///|
@@ -138,4 +143,23 @@ test "リンクをトークン化する" {
     T::Text("URL"),
     T::RightParen,
   ])
+}
+
+///|
+test "連続したバッククォートをトークン化する" {
+  assert_eq(tokenize("```"), [T::Backtick(3)])
+  assert_eq(tokenize("``前 `コード` 後``"), [
+    T::Backtick(2),
+    T::Text("前 "),
+    T::Backtick(1),
+    T::Text("コード"),
+    T::Backtick(1),
+    T::Text(" 後"),
+    T::Backtick(2),
+  ])
+}
+
+///|
+test "バッククォートの前のバックスラッシュを文字としてトークン化する" {
+  assert_eq(tokenize("\\``"), [T::Backslash, T::Backtick(2)])
 }

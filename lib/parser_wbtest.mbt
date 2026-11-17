@@ -50,7 +50,7 @@ test "閉じられていない太字の区切りを文字として残す" {
 
 ///|
 test "閉じられていないコードの区切りを文字として残す" {
-  assert_eq(parse([T::Text("前 "), T::Backtick, T::Text("太字")]), [
+  assert_eq(parse([T::Text("前 "), T::Backtick(1), T::Text("太字")]), [
     N::Text("前 "),
     N::Text("`"),
     N::Text("太字"),
@@ -73,7 +73,7 @@ test "コードと太字が両方閉じられていない場合も元の順序�
     parse([
       T::DoubleAsterisk,
       T::Text("前 "),
-      T::Backtick,
+      T::Backtick(1),
       T::Text("コード"),
     ]),
     [N::Text("**"), N::Text("前 "), N::Text("`"), N::Text("コード")],
@@ -84,13 +84,13 @@ test "コードと太字が両方閉じられていない場合も元の順序�
 test "複数のコードを前の内容を引き継がずに組み立てる" {
   assert_eq(
     parse([
-      T::Backtick,
+      T::Backtick(1),
       T::Text("一つ目"),
-      T::Backtick,
+      T::Backtick(1),
       T::Text("と"),
-      T::Backtick,
+      T::Backtick(1),
       T::Text("二つ目"),
-      T::Backtick,
+      T::Backtick(1),
     ]),
     [N::Code("一つ目"), N::Text("と"), N::Code("二つ目")],
   )
@@ -457,7 +457,9 @@ test "コード外ではエスケープのバックスラッシュを取り除�
 
 ///|
 test "コード内ではエスケープのバックスラッシュを保持する" {
-  assert_eq(parse([T::Backtick, T::Escaped('_'), T::Backtick]), [N::Code("\\_")])
+  assert_eq(parse([T::Backtick(1), T::Escaped('_'), T::Backtick(1)]), [
+    N::Code("\\_"),
+  ])
 }
 
 ///|
@@ -564,15 +566,39 @@ test "未完成のリンクを文字列へ戻す" {
 }
 
 ///|
-test "エスケープされたバッククォートのトークンをコード内外で区別する" {
-  assert_eq(parse([T::Escaped('`')]), [N::Text("`")])
-  assert_eq(parse([T::Backtick, T::Text("内容"), T::Escaped('`')]), [
-    N::Code("内容\\"),
-  ])
-}
-
-///|
 test "文字列中のエスケープされたバッククォートをコード内外で区別する" {
   assert_eq(parse(tokenize("\\`")), [N::Text("`")])
   assert_eq(parse(tokenize("`内容\\`")), [N::Code("内容\\")])
+}
+
+///|
+test "コード内で個数が異なるバッククォートとバックスラッシュを保持する" {
+  assert_eq(parse(tokenize("``内容\\`続き``")), [N::Code("内容\\`続き")])
+}
+
+///|
+test "バックスラッシュの後に3連続のバッククォートを2連続のバッククォートで閉じる" {
+  assert_eq(parse(tokenize("\\```内容``")), [N::Text("`"), N::Code("内容")])
+}
+
+///|
+test "コード内のバックスラッシュ直後のバッククォートで閉じる" {
+  assert_eq(parse(tokenize("``内容\\``")), [N::Code("内容\\")])
+}
+
+///|
+test "開始より多いバッククォートではコードを閉じない" {
+  assert_eq(parse(tokenize("``前```後``")), [N::Code("前```後")])
+}
+
+///|
+test "閉じられていない複数個のバッククォートを元の個数で戻す" {
+  assert_eq(parse(tokenize("``内容")), [N::Text("``"), N::Text("内容")])
+}
+
+///|
+test "リンクのラベル内でバッククォートのエスケープを解釈する" {
+  assert_eq(parse(tokenize("[前\\`後](https://example.com/)")), [
+    N::Link(label="前`後", url="https://example.com/"),
+  ])
 }
