@@ -64,7 +64,17 @@ fn parse(tokens : Array[Token]) -> Array[Node] {
     if code_state is Some((code_tmp, backtick_count)) {
       if token is Backtick(count) {
         if count == backtick_count {
-          push_node(stack, nodes, Node::Code(code_tmp.to_string()))
+          let s = code_tmp
+            .to_string()
+            .replace_all(old="\r\n", new=" ")
+            .replace_all(old="\r", new=" ")
+            .replace_all(old="\n", new=" ")
+          let s = match s {
+            [' ', .. inner, ' '] if inner.iter().any(c => c != ' ') =>
+              inner.to_owned()
+            _ => s
+          }
+          push_node(stack, nodes, Node::Code(s))
           code_state = None
         } else {
           code_tmp.write_string("`".repeat(count))

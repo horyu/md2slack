@@ -602,3 +602,42 @@ test "リンクのラベル内でバッククォートのエスケープを解�
     N::Link(label="前`後", url="https://example.com/"),
   ])
 }
+
+///|
+test "コード内の前後に1つのスペースがある場合は取り除く" {
+  assert_eq(parse(tokenize("` 内容 `")), [N::Code("内容")])
+}
+
+///|
+test "コード内の両端に複数のスペースがある場合は各端から1つ取り除く" {
+  assert_eq(parse(tokenize("`  内容  `")), [N::Code(" 内容 ")])
+  assert_eq(parse(tokenize("`   内容   `")), [N::Code("  内容  ")])
+}
+
+///|
+test "コード内の前か後のみに1つのスペースがある場合は維持する" {
+  assert_eq(parse(tokenize("` 内容`")), [N::Code(" 内容")])
+  assert_eq(parse(tokenize("`内容 `")), [N::Code("内容 ")])
+}
+
+///|
+test "コード内がスペースのみの場合はスペースを保持する" {
+  assert_eq(parse(tokenize("` `")), [N::Code(" ")])
+  assert_eq(parse(tokenize("`  `")), [N::Code("  ")])
+  assert_eq(parse(tokenize("`   `")), [N::Code("   ")])
+}
+
+///|
+test "コード内の両端にある改行しない空白は保持する" {
+  assert_eq(parse(tokenize("`\u00a0内容\u00a0`")), [
+    N::Code("\u00a0内容\u00a0"),
+  ])
+}
+
+///|
+test "コード内の改行は半角スペースに変換される" {
+  assert_eq(parse(tokenize("`\n内容\n続き`")), [N::Code(" 内容 続き")])
+  assert_eq(parse(tokenize("`\n内容\n`")), [N::Code("内容")])
+  assert_eq(parse(tokenize("`前\r\n後`")), [N::Code("前 後")])
+  assert_eq(parse(tokenize("`前\r後`")), [N::Code("前 後")])
+}
