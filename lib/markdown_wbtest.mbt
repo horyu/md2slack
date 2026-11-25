@@ -266,7 +266,7 @@ test "箇条書き記号直後にスペースがなければ通常の文字や�
 }
 
 ///|
-test "行頭の見出しを階層にかかわらず太字に変換する" {
+test "見出しは3段階まで変換し、4段階以降の記号は残す" {
   let markdown =
     #|# 一
     #|## 二
@@ -275,7 +275,7 @@ test "行頭の見出しを階層にかかわらず太字に変換する" {
     #|##### 五
     #|###### 六
   let expected =
-    #|<b data-stringify-type="bold">一</b><br><b data-stringify-type="bold">二</b><br><b data-stringify-type="bold">三</b><br><b data-stringify-type="bold">四</b><br><b data-stringify-type="bold">五</b><br><b data-stringify-type="bold">六</b>
+    #|<h1>一</h1><h2>二</h2><h3>三</h3>#### 四<br>##### 五<br>###### 六
   assert_eq(markdown_to_slack_html(markdown), expected)
 }
 
@@ -286,12 +286,12 @@ test "見出しを通常行と区切り、本文のコードやリンクを変�
     #|## <見出し>& `code` [リンク](https://example.com/)
     #|後
   let expected =
-    #|前<br><b data-stringify-type="bold">&lt;見出し&gt;&amp; <code data-stringify-type="code">code</code> <a href="https://example.com/">リンク</a></b><br>後
+    #|前<h2>&lt;見出し&gt;&amp; <code data-stringify-type="code">code</code> <a href="https://example.com/">リンク</a></h2>後
   assert_eq(markdown_to_slack_html(markdown), expected)
 }
 
 ///|
-test "見出しの記号は行頭とスペースと六段階までを条件に認識する" {
+test "見出しの記号は行頭とスペースを条件に認識する" {
   let markdown =
     #|途中 # 記号
     #|#空白なし
@@ -303,7 +303,7 @@ test "見出しの記号は行頭とスペースと六段階までを条件に�
   assert_eq(
     markdown_to_slack_html("# "),
     (
-      #|<b data-stringify-type="bold"></b>
+      #|<h1></h1>
     ),
   )
 }

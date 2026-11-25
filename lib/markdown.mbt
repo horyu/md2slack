@@ -327,18 +327,18 @@ fn render_child_lists(
 }
 
 ///|
-/// 戻り値は見出しの記号と直後のスペースを除いた本文。見出しの行でなければ None。
-fn heading_content(line : StringView) -> StringView? {
+/// 見出しの階層と本文を返す。見出しの行でなければ None。
+fn heading_content(line : StringView) -> (Int32, StringView)? {
   let mut remaining = line
   let mut level = 0
-  while remaining.has_prefix("#") && level < 6 {
+  while remaining.has_prefix("#") && level < 3 {
     remaining = remaining[1:]
     level += 1
   }
   if level == 0 {
     return None
   }
-  remaining.strip_prefix(" ")
+  remaining.strip_prefix(" ").map(content => (level, content))
 }
 
 ///|
@@ -398,8 +398,11 @@ fn render_blocks(text : StringView) -> String {
   let mut html = ""
   let mut previous_is_block = false
   while index < lines.length() {
+    let heading = heading_content(lines[index])
+    let is_heading_block = heading is Some(_)
     if index > 0 &&
       !previous_is_block &&
+      !is_heading_block &&
       !is_code_block_start(lines[index]) &&
       !(ordered_item(lines[index]) is Some((0, _, _))) {
       html += "<br>"
@@ -425,10 +428,10 @@ fn render_blocks(text : StringView) -> String {
       previous_is_block = true
       continue
     }
-    if heading_content(lines[index]) is Some(heading) {
-      html += "<b data-stringify-type=\"bold\">" +
-        render_inline(heading) +
-        "</b>"
+    if heading is Some((level, content)) {
+      let body = render_inline(content)
+      html += "<h\{level}>\{body}</h\{level}>"
+      previous_is_block = true
       index += 1
       continue
     }
